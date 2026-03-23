@@ -4,9 +4,8 @@ First step: download and install uv through one of its various methods of instal
 
 # Setup Project for Editing and Testing
 1. git clone the repo, either using ssh (with an SSH Key) or http.
-2. `uv venv` to create a .venv (virutal environment) in the project directory. (if there isn't one already)
-3. `uv pip install -e .` to install the requirements and the code in the src directory. This is done so code in different files within the modules can be imported.
-4. `uv run (name of file)` to run a file.
+2. `uv sync` to sync all the dependencies.
+3. `uv run (name of file)` to run a file.
 
 # Adding or removing dependencies
 1. `uv add (dependency_name)` will auto-magically add an external dependency to the project. Note that internal python modules (e.g., tkinter) will throw an error if you try to add it. Just import it.

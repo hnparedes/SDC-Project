@@ -2,6 +2,14 @@ version = 1
 revision = 3
 requires-python = ">=3.14"
 
+[manifest]
+members = [
+    "sdc-archiver",
+    "sdc-common-packages",
+    "sdc-project",
+    "sdc-viewer",
+]
+
 [[package]]
 name = "colorama"
 version = "0.4.6"
@@ -64,12 +72,35 @@ wheels = [
 ]
 
 [[package]]
+name = "sdc-archiver"
+version = "0.1.0"
+source = { editable = "packages/sdc_archiver" }
+
+[[package]]
+name = "sdc-common-packages"
+version = "0.1.0"
+source = { editable = "packages/sdc_common_packages" }
+
+[[package]]
 name = "sdc-project"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "pytest" },
+    { name = "sdc-archiver" },
+    { name = "sdc-common-packages" },
+    { name = "sdc-viewer" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pytest", specifier = ">=9.0.2" }]
+requires-dist = [
+    { name = "pytest", specifier = ">=9.0.2" },
+    { name = "sdc-archiver", editable = "packages/sdc_archiver" },
+    { name = "sdc-common-packages", editable = "packages/sdc_common_packages" },
+    { name = "sdc-viewer", editable = "packages/sdc_viewer" },
+]
+
+[[package]]
+name = "sdc-viewer"
+version = "0.1.0"
+source = { editable = "packages/sdc_viewer" }
