@@ -4,4 +4,30 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "pytest>=9.0.2",
+    "sdc_common_packages",
+    "sdc_archiver",
+    "sdc_viewer"
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+sdc_common_packages = {workspace=true}
+sdc_archiver = {workspace=true}
+sdc_viewer = {workspace=true}
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.pyright]
+extraPaths = ["src"]
+typeCheckingMode = "off"
+venvPath = "."
+venv = ".venv"
