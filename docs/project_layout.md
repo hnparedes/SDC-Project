@@ -4,7 +4,7 @@ This serves as a guide to get used to the src layout of Python projects.
 The project is maintained using uv, and I recommend using it. Though, you can also maintain it with a standard pip.
 
 # Layout
-- docs: Contains documentation. So far, only the project layout
+- docs: Contains documentation, such as the project layout and project support.
 - data (if needed): Will contain any locally stored data.
 - src: Contains all the source code
   - sdc_archiver: The package containing all the code for the SDC Archiver
