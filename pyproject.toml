@@ -6,7 +6,18 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "pytest>=9.0.2",
+    "common",
+    "sdc_archiver",
+    "sdc_viewer"
 ]
+
+[tool.uv.sources]
+common = {workspace = true}
+sdc_archiver = {workspace = true}
+sdc_viewer = {workspace = true}
+
+[tool.uv.workspace]
+members = ["packages/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
