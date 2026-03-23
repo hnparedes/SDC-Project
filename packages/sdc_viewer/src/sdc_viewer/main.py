@@ -1,5 +1,5 @@
 def main():
-    print("Hello from sdc-project!")
+    print("Hello from sdc-viewer!")
 
 
 if __name__ == "__main__":
