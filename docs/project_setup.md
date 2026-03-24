@@ -6,8 +6,9 @@ Pre-requisites:
 
 # Setup Project for Editing and Testing
 1. git clone the repo, either using ssh (with an SSH Key) or http.
-2. `uv sync` to sync all the dependencies. We are using uv workspaces to manage each individual package (don't worry about the specifics, I'll worry about them).
-3. Due to executables files being under *five layers of directories*, running `uv run (name_of_file)` is cumbersome. Instead, there is a **Makefile** in the project root. 
+2. `uv venv` to create a virtual environment.
+3. `uv sync` to sync all the dependencies. We are using uv workspaces to manage each individual package (don't worry about the specifics, I'll worry about them).
+4. Due to executables files being under *five layers of directories*, running `uv run (name_of_file)` is cumbersome. Instead, there is a **Makefile** in the project root. 
 The Makefile contains aliases that run the long cumbersome commands. With make installed, just run `make (alias)` to run an aliased command. You can even add more if you want!
 
 # Adding or removing dependencies
