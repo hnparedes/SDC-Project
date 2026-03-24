@@ -5,17 +5,23 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "pytest>=9.0.2",
-    "sdc_common_packages",
+    "sdc_common_module",
     "sdc_archiver",
-    "sdc_viewer"
+    "sdc_viewer",
+    "py7zr>=1.1.0",
+    "pycryptodome>=3.23.0"
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2"
 ]
 
 [tool.uv]
 package = false
 
 [tool.uv.sources]
-sdc_common_packages = {workspace=true}
+sdc_common_module = {workspace=true}
 sdc_archiver = {workspace=true}
 sdc_viewer = {workspace=true}
 
