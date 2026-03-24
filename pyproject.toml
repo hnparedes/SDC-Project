@@ -9,7 +9,7 @@ dependencies = [
     "sdc_archiver",
     "sdc_viewer",
     "py7zr>=1.1.0",
-    "pycryptodome>=3.23.0",
+    "pycryptodome>=3.23.0"
 ]
 
 [dependency-groups]
