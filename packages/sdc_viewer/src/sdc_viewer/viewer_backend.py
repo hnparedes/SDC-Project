@@ -3,10 +3,13 @@ import os
 import shutil
 import tempfile
 
+# For 7zip support
 import py7zr
+
+# PyCryptodome for hashing
 from Crypto.Cipher import AES
-from Crypto.Random import get_random_bytes
-from Crypto.Util.Padding import pad, unpad
+from Crypto.Util.Padding import unpad
+from sdc_common_module.acm import AccessControlMatrix
 
 
 # Viewer backend class
