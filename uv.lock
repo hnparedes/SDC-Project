@@ -346,6 +346,11 @@ dependencies = [
     { name = "sdc-viewer" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "py7zr", specifier = ">=1.1.0" },
@@ -355,6 +360,9 @@ requires-dist = [
     { name = "sdc-common-packages", editable = "packages/sdc_common_packages" },
     { name = "sdc-viewer", editable = "packages/sdc_viewer" },
 ]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pytest", specifier = ">=9.0.2" }]
 
 [[package]]
 name = "sdc-viewer"
