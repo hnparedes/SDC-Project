@@ -22,6 +22,8 @@ class SDCArchiver:
     def export_archive(self, archive_name, archive_password):
         temp_dir = tempfile.mkdtemp(prefix=".tempdir_sdc_")
         try:
+            # Hash password for 7z encryption
+            hashed_password = hashlib.sha256(archive_password.encode()).hexdigest()
             for fid, fpath in self.documents.items():
                 # 32 bytes -> 256 bits
                 key = get_random_bytes(32)
@@ -33,6 +35,11 @@ class SDCArchiver:
                     data = f.read()
 
                 encrypted_data = cipher.iv + cipher.encrypt(pad(data, AES.block_size))
+
+                # Ensure encryption actually changed the data
+                if encrypted data[16:] == data:
+                    raise Exception(f"Encryption failed for {fid}")
+                
                 with open(os.path.join(temp_dir, fid), "wb") as f:
                     f.write(encrypted_data)
 
@@ -43,7 +50,7 @@ class SDCArchiver:
                 json.dump(self.key_library, f)
 
             with py7zr.SevenZipFile(
-                archive_name, "w", password=archive_password
+                archive_name, "w", password=hashed_password
             ) as archive:
                 archive.writeall(temp_dir, "sdc_contents")
             return True
