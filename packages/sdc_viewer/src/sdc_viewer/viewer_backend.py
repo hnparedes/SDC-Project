@@ -62,22 +62,34 @@ class SDCViewer:
 
     # Function to extract a select file
     def extract_document(self, file_id, dest_path):
-        key = bytes.fromhex(self.key_library[file_id])
-        enc_filepath = os.path.join(self.contents_dir, file_id)
+        try:
+            key = bytes.fromhex(self.key_library[file_id])
+            enc_filepath = os.path.join(self.contents_dir, file_id)
 
-        # Read encrpyped file in binary mode
-        with open(enc_filepath, "rb") as f:
+            # Read encrpyped file in binary mode
+            with open(enc_filepath, "rb") as f:
             # IV -> Initialization Vector
-            iv = f.read(16)
-            ciphertext = f.read()
+                iv = f.read(16)
+                ciphertext = f.read()
 
-        # Decrypt the file
-        cipher = AES.new(key, AES.MODE_CBC, iv=iv)
-        decrypted_data = unpad(cipher.decrypt(ciphertext), AES.block_size)
+            # Validate encrypted structure
+            if len(ciphertext) == 0:
+                raise Exception("File is not properly encrypted or is corrupted")
 
-        # Write decrypted file in byte mode
-        with open(dest_path, "wb") as f:
-            f.write(decrypted_data)
+            # Decrypt the file
+            cipher = AES.new(key, AES.MODE_CBC, iv=iv)
+            decrypted_data = unpad(cipher.decrypt(ciphertext), AES.block_size)
+
+            # Write decrypted file in byte mode
+            with open(dest_path, "wb") as f:
+                f.write(decrypted_data)
+
+            # Inform user data is accessible
+            return True
+
+        except Exception as e:
+            # Inform user data is NOT accessible
+            raise Exception(f"Data cannot be accessed: {e}")
 
     # Helper function to clear temp directory after closing viewer
     def close(self):
