@@ -9,7 +9,11 @@ Pre-requisites:
 2. `uv venv` to create a virtual environment.
 3. `uv sync` to sync all the dependencies. We are using uv workspaces to manage each individual package (don't worry about the specifics, I'll worry about them).
 4. Due to executables files being under *five layers of directories*, running `uv run (name_of_file)` is cumbersome. Instead, there is a **Makefile** in the project root. 
-The Makefile contains aliases that run the long cumbersome commands. With make installed, just run `make (alias)` to run an aliased command. You can even add more if you want!
+The Makefile contains aliases that run the long cumbersome commands.
+
+## Make command master list
+- `make run-archiver`: Runs the archiver program
+- `make run-viewer`: Runs the viewer program 
 
 # Adding or removing dependencies
 1. `uv add (dependency_name)` will auto-magically add an external dependency to the project. Note that internal python modules (e.g., tkinter) will throw an error if you try to add it. Just import it.
