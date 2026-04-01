@@ -25,6 +25,6 @@ Pytest is how you do unit and integration testing. It is complex and versatile.
 The pyproject.toml file already has pytest stuff configured by me, so thankfully you don't have to worry about configuring it.
 
 Some cool commands  *(incomplete)*
-- `uv pytest` : Runs every test (not recommended).
-- `uv pytest -k (test_name)`: Run a specific test using a keyword expression
+- `uv run pytest` : Runs every test (not recommended).
+- `uv run pytest -k (test_name)`: Run a specific test using a keyword expression
 - Add a `-s` flag to show print statements in the output.
