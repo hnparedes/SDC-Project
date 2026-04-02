@@ -2,7 +2,7 @@
 normalsdc.7z
 
 === ARCHIVE DESCRIPTION
-This is a test SDC with all of the features that would be expected in a normal SDC. It does not intentionally contain any edge cases or unusual contents. Intended to be used for testing basic SDC functionality.
+This is a hopefully well-behaved test SDC with all of the features that would be expected in a normal SDC. It does not intentionally contain any edge cases or unusual contents. Intended to be used for testing basic SDC functionality.
 
 === ARCHIVE FEATURES
 - Multiple access levels with a hierarchical structure, where each access level can access all files available to "lower" access levels. This is not strictly enforced.
