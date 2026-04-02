@@ -117,12 +117,7 @@ class ArchiverGUI(tk.Tk):
         )
         # Button to delete user
         tk.Button(
-            user_btn_frame,
-            text="Delete",
-            width=8,
-            command=lambda: self.delete_tree_item(
-                self.user_tree, self.backend.acm.users
-            ),
+            user_btn_frame, text="Delete", width=8, command=self.delete_user
         ).pack(side=tk.LEFT, padx=2)
 
         # Setup listing of user, access levels
@@ -155,7 +150,7 @@ class ArchiverGUI(tk.Tk):
         )
 
     def refresh_sub_trees(self):
-        """Helper to redraw users and documents if an Access Level is renamed."""
+        # Helper to redraw users and documents if an Access Level is renamed.
         for item in self.user_tree.get_children():
             self.user_tree.delete(item)
         for uid, udata in self.backend.acm.users.items():
@@ -180,7 +175,7 @@ class ArchiverGUI(tk.Tk):
             if item_text in data_struct:
                 del data_struct[item_text]
 
-    # Methods for adding
+    # Addition methods
     def add_access_level(self):
         pop = tk.Toplevel(self)
         pop.title("Edit/Add Access Level")
@@ -396,6 +391,18 @@ class ArchiverGUI(tk.Tk):
         tk.Button(pop, text="Apply", command=apply).pack(pady=5)
 
     # Deletion methods (currently WIP)
+    def delete_user(self):
+        selected = self.user_tree.selection()
+        if not selected:
+            return
+
+        uid = self.user_tree.item(selected[0])["values"][0]
+
+        if uid in self.backend.acm.users:
+            del self.backend.acm.users[uid]
+
+        self.user_tree.delete(selected[0])
+    
     def delete_document(self):
         selected = self.doc_tree.selection()
         if not selected:
