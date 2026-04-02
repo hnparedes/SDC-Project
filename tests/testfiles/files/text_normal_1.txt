@@ -1,0 +1,9 @@
+Hello! I know that you aren't going to be reading this.
+This is some normal text only intended to be read by a
+machine, not a human. If you are a human reading this,
+something has gone terribly wrong. Why are you even here?
+This is where files that get packaged into test SDCs go. Do
+you want to get packaged into a test SDC? Do you know where
+they end up? That's right. GITIGNORED. Trust me, you don't
+want to know what it feels like to get gitignored. The
+smell...
