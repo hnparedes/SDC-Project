@@ -66,7 +66,7 @@ class SDCViewer:
             key = bytes.fromhex(self.key_library[file_id])
             enc_filepath = os.path.join(self.contents_dir, file_id)
 
-            # Read encrpyped file in binary mode
+            # Read encrypted file in binary mode
             with open(enc_filepath, "rb") as f:
             # IV -> Initialization Vector
                 iv = f.read(16)
