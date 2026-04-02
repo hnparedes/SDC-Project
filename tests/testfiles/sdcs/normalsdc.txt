@@ -1,0 +1,30 @@
+=== ARCHIVE NAME
+normalsdc.7z
+
+=== ARCHIVE DESCRIPTION
+This is a test SDC with all of the features that would be expected in a normal SDC. It does not intentionally contain any edge cases or unusual contents. Intended to be used for testing basic SDC functionality.
+
+=== ARCHIVE FEATURES
+- Multiple access levels with a hierarchical structure, where each access level can access all files available to "lower" access levels. This is not strictly enforced.
+- Multiple users of each access level.
+- Multiple files available to different access levels.
+
+=== ARCHIVE DETAILS
+
+Archive password:
+	sonormal
+
+Access levels:
+	default
+	privileged
+	admin
+
+Documents:
+	text_normal_1.txt - Accessible by default, privileged, admin
+	text_normal_2.txt - Accessible by privileged, admin
+	text_normal_3.txt - Accessible by admin
+
+Users:
+	alice (admin, password letmein)
+	bob (privileged, password opensesame)
+	charlie (default, password password)

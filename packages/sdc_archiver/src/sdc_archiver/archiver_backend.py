@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 import tempfile
+import hashlib
 
 import py7zr
 from Crypto.Cipher import AES
