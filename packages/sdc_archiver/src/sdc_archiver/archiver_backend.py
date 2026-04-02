@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 import tempfile
+import hashlib
 
 import py7zr
 from Crypto.Cipher import AES
@@ -37,9 +38,9 @@ class SDCArchiver:
                 encrypted_data = cipher.iv + cipher.encrypt(pad(data, AES.block_size))
 
                 # Ensure encryption actually changed the data
-                if encrypted data[16:] == data:
+                if encrypted_data[16:] == data:
                     raise Exception(f"Encryption failed for {fid}")
-                
+
                 with open(os.path.join(temp_dir, fid), "wb") as f:
                     f.write(encrypted_data)
 
