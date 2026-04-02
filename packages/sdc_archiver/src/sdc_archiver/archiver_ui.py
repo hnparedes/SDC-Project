@@ -155,19 +155,6 @@ class ArchiverGUI(tk.Tk):
             levels = self.backend.acm.files.get(fid, [])
             self.doc_tree.insert("", "end", values=(fid, ", ".join(levels)))
 
-    def delete_tree_item(self, tree, data_struct, is_list=False):
-        selected = tree.selection()
-        if not selected:
-            return
-        item_text = tree.item(selected[0])["values"][0]
-        tree.delete(selected[0])
-        if is_list:
-            if item_text in data_struct:
-                data_struct.remove(item_text)
-        else:
-            if item_text in data_struct:
-                del data_struct[item_text]
-
     # Addition methods
     def add_access_level(self):
         pop = tk.Toplevel(self)
