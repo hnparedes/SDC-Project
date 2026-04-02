@@ -376,25 +376,43 @@ class ArchiverGUI(tk.Tk):
         if not selected:
             return
 
-        level_to_delete = self.al_tree.item(selected[0])["values"][0]
+        lvl_to_delete = self.al_tree.item(selected[0])["values"][0]
 
-        # Remove from backend's main access level list
-        if level_to_delete in self.backend.acm.access_levels:
-            self.backend.acm.access_levels.remove(level_to_delete)
-
-        # Remove this access level from any documents through iteration
-        for fid, levels in self.backend.acm.files.items():
-            if level_to_delete in levels:
-                levels.remove(level_to_delete)
-
-        # Remove any users that were assigned to this access level through iteration
-        users_to_delete = [
+        # Identify any users that are currently using this access level
+        affected_users = [
             uid
             for uid, udata in self.backend.acm.users.items()
-            if udata["access_level"] == level_to_delete
+            if udata["access_level"] == lvl_to_delete
         ]
-        for uid in users_to_delete:
-            del self.backend.acm.users[uid]
+
+        # Warn the user before proceeding with the deletion
+        if affected_users:
+            msg = (
+                f"The following users are currently assigned to '{lvl_to_delete}':\n"
+                f"{', '.join(affected_users)}\n\n"
+                f"Their access level will be changed to 'Unassigned'. Do you wish to proceed?"
+            )
+            if not messagebox.askyesno("Confirm Deletion", msg):
+                return
+            else:
+                if not messagebox.askyesno(
+                    "Confirm Deletion",
+                    f"Are you sure you want to delete the access level '{lvl_to_delete}'?",
+                ):
+                    return
+
+        # Remove from backend's main access level list
+        if lvl_to_delete in self.backend.acm.access_levels:
+            self.backend.acm.access_levels.remove(lvl_to_delete)
+
+        # Remove this access level from any documents through iteration
+        for levels in self.backend.acm.files.items():
+            if lvl_to_delete in levels:
+                levels.remove(lvl_to_delete)
+
+        # Set affected users to "Unassigned"
+        for uid in affected_users:
+            self.backend.acm.users[uid]["access_level"] = "Unassigned"
 
         # Remove from UI tree and refresh sub-trees
         self.al_tree.delete(selected[0])
