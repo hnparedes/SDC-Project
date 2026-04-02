@@ -62,12 +62,7 @@ class ArchiverGUI(tk.Tk):
         )
         # Button to delete document
         tk.Button(
-            doc_btn_frame,
-            text="Delete",
-            width=8,
-            command=lambda: self.delete_tree_item(
-                self.doc_tree, self.backend.documents
-            ),
+            doc_btn_frame, text="Delete", width=8, command=self.delete_document
         ).pack(side=tk.LEFT, padx=2)
 
         # List out files along their access level
@@ -400,9 +395,21 @@ class ArchiverGUI(tk.Tk):
 
         tk.Button(pop, text="Apply", command=apply).pack(pady=5)
 
-    # If you're looking for deletion methods, they were passed as lambda functions in the
-    # GUI functions for deletion.
-    # TODO: Check and see if that was a good idea. Probably wasn't.
+    # Deletion methods (currently WIP)
+    def delete_document(self):
+        selected = self.doc_tree.selection()
+        if not selected:
+            return
+
+        fid = self.doc_tree.item(selected[0])["values"][0]
+
+        # Remove from list and the ACM permissions dictionary
+        if fid in self.backend.documents:
+            del self.backend.documents[fid]
+        if fid in self.backend.acm.files:
+            del self.backend.acm.files[fid]
+
+        self.doc_tree.delete(selected[0])
 
     # SDC export GUI function
     def export_sdc(self):
