@@ -469,7 +469,7 @@ class ArchiverGUI(tk.Tk):
         # Check for unassigned users before continuing
         unassigned_users =[uid for uid, udata in self.backend.acm.users.items() if udata["access_level"] == "Unassigned"]
         if unassigned_users:
-            msg = (f"Warning: There are {len(orphaned_users)} user(s) with an 'Unassigned' access level.\n\n"
+            msg = (f"Warning: There are {len(unassigned_users)} user(s) with an 'Unassigned' access level.\n\n"
                    f"These users will NOT be able to view any documents. Do you want to continue exporting?")
             if not messagebox.askyesno("Unassigned Users Detected", msg):
                 return
