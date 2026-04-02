@@ -166,6 +166,12 @@ class ArchiverGUI(tk.Tk):
 
         def apply():
             lvl = entry.get().strip()
+
+            # Prevent creation of 'Unassigned'
+            if lvl.lower() == "unassigned":
+                messagebox.showerror("Error", "'Unassigned' is a reserved system level.")
+                return
+            
             if lvl and lvl not in self.backend.acm.access_levels:
                 self.backend.acm.access_levels.append(lvl)
                 self.al_tree.insert("", "end", values=(lvl,))
@@ -260,6 +266,12 @@ class ArchiverGUI(tk.Tk):
 
         def apply():
             new_lvl = entry.get().strip()
+
+            # Prevent renaming to 'Unassigned'
+            if new_lvl.lower() == "unassigned":
+                messagebox.showerror("Error", "'Unassigned' is a reserved system level.")
+                return
+                
             if (
                 new_lvl
                 and new_lvl != old_lvl
@@ -453,6 +465,14 @@ class ArchiverGUI(tk.Tk):
         if not self.backend.documents:
             messagebox.showerror("Error", "Add at least one document.")
             return
+
+        # Check for unassigned users before continuing
+        unassigned_users =[uid for uid, udata in self.backend.acm.users.items() if udata["access_level"] == "Unassigned"]
+        if unassigned_users:
+            msg = (f"Warning: There are {len(orphaned_users)} user(s) with an 'Unassigned' access level.\n\n"
+                   f"These users will NOT be able to view any documents. Do you want to continue exporting?")
+            if not messagebox.askyesno("Unassigned Users Detected", msg):
+                return
 
         pop = tk.Toplevel(self)
         pop.title("Export SDC")
