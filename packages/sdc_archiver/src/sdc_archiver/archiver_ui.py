@@ -418,7 +418,7 @@ class ArchiverGUI(tk.Tk):
             self.backend.acm.access_levels.remove(lvl_to_delete)
 
         # Remove this access level from any documents through iteration
-        for levels in self.backend.acm.files.items():
+        for fid, levels in self.backend.acm.files.items():
             if lvl_to_delete in levels:
                 levels.remove(lvl_to_delete)
 
