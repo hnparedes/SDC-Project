@@ -147,6 +147,16 @@ class AccessControlMatrix:
         return True
 
     def get_users_with_access_level(self, lvl):
+        # Should these return an error instead of an empty array?
+
+        # Is the level name nonempty?
+        if not lvl:
+            return []
+
+        # Does the access level exist?
+        if lvl not in self.access_levels:
+            return []
+
         return [
             uid
             for uid, udata in self.users.items()
@@ -154,6 +164,16 @@ class AccessControlMatrix:
         ]
 
     def delete_access_level(self, lvl_to_delete):
+        # Is the level name nonempty?
+        if not lvl_to_delete:
+            return False
+
+        # Does the access level exist?
+        if lvl_to_delete not in self.access_levels:
+            return False
+
+        affected_users = self.get_users_with_access_level(lvl_to_delete)
+
         # Remove from backend's main access level list
         if lvl_to_delete in self.access_levels:
             self.access_levels.remove(lvl_to_delete)
@@ -163,7 +183,6 @@ class AccessControlMatrix:
             if lvl_to_delete in levels:
                 levels.remove(lvl_to_delete)
 
-        affected_users = self.get_users_with_access_level(lvl_to_delete)
         # Set affected users to "Unassigned"
         for uid in affected_users:
             self.users[uid]["access_level"] = "Unassigned"
@@ -171,15 +190,30 @@ class AccessControlMatrix:
         return True
 
     def delete_user(self, uid):
+        # Is the user ID nonempty?
+        if not uid:
+            return False
+
+        # Does the user exist?
+        if uid not in self.users:
+            return False
+
         # Remove from user list and access control
         if uid in self.users:
             del self.users[uid]
         return True
 
     def delete_document(self, fid):
-        # Remove from file list and access control
+        # Is the document ID nonempty?
+        if not fid:
+            return False
+
+        # Does the document exist?
+        if fid not in self.documents:
+            return False
+
         if fid in self.documents:
-            del self.backend.acm.documents[fid]
+            del self.documents[fid]
         return True
 
     # JSON formatting helper
