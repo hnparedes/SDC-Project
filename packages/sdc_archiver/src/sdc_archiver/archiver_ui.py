@@ -171,7 +171,7 @@ class ArchiverGUI(tk.Tk):
             if lvl.lower() == "unassigned":
                 messagebox.showerror("Error", "'Unassigned' is a reserved system level.")
                 return
-              
+
             # Try adding the access level to the ACM
             if self.backend.acm.add_access_level(lvl):
                 # If it succeeds, update the access level treeview
@@ -273,7 +273,7 @@ class ArchiverGUI(tk.Tk):
             if new_lvl.lower() == "unassigned":
                 messagebox.showerror("Error", "'Unassigned' is a reserved system level.")
                 return
-                
+
             # Try renaming the access level
             if self.backend.acm.rename_access_level(old_lvl, new_lvl):
                 # If successful, update all treeviews that are affected by the change
@@ -395,7 +395,7 @@ class ArchiverGUI(tk.Tk):
             self.backend.acm.access_levels.remove(lvl_to_delete)
 
         # Remove this access level from any documents through iteration
-        for fid, levels in self.backend.acm.files.items():
+        for fid, levels in self.backend.acm.documents.items():
             if lvl_to_delete in levels:
                 levels.remove(lvl_to_delete)
 
@@ -406,7 +406,7 @@ class ArchiverGUI(tk.Tk):
         # Remove from UI tree and refresh sub-trees
         self.al_tree.delete(selected[0])
         self.refresh_sub_trees()
-        
+
     def delete_user(self):
         selected = self.user_tree.selection()
         if not selected:
@@ -420,7 +420,7 @@ class ArchiverGUI(tk.Tk):
 
         # Remove from UI tree
         self.user_tree.delete(selected[0])
-    
+
     def delete_document(self):
         selected = self.doc_tree.selection()
         if not selected:
@@ -429,10 +429,10 @@ class ArchiverGUI(tk.Tk):
         fid = self.doc_tree.item(selected[0])["values"][0]
 
         # Remove from file list and access control
-        if fid in self.backend.documents:
-            del self.backend.documents[fid]
-        if fid in self.backend.acm.files:
-            del self.backend.acm.files[fid]
+        if fid in self.backend.document_filepaths:
+            del self.backend.document_filepaths[fid]
+        if fid in self.backend.acm.documents:
+            del self.backend.acm.documents[fid]
 
         # Remove from UI tree
         self.doc_tree.delete(selected[0])
