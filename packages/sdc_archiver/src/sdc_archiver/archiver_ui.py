@@ -62,13 +62,7 @@ class ArchiverGUI(tk.Tk):
         )
         # Button to delete document
         tk.Button(
-            doc_btn_frame,
-            text="Delete",
-            width=8,
-            command=lambda: self.delete_tree_item(
-                self.doc_tree, self.backend.document_filepaths
-            ),
-        ).pack(side=tk.LEFT, padx=2)
+            doc_btn_frame, text="Delete", width=8, command=self.delete_document).pack(side=tk.LEFT, padx=2)
 
         # List out files along their access level
         self.doc_tree = ttk.Treeview(
@@ -94,13 +88,7 @@ class ArchiverGUI(tk.Tk):
         ).pack(side=tk.LEFT, padx=2)
         # Delete access levels
         tk.Button(
-            al_btn_frame,
-            text="Delete",
-            width=8,
-            command=lambda: self.delete_tree_item(
-                self.al_tree, self.backend.acm.access_levels, is_list=True
-            ),
-        ).pack(side=tk.LEFT, padx=2)
+            al_btn_frame, text="Delete", width=8, command=self.delete_access_level).pack(side=tk.LEFT, padx=2)
 
         self.al_tree = ttk.Treeview(al_frame, columns=("Name",), show="headings")
         self.al_tree.heading("Name", text="Name")
@@ -122,12 +110,7 @@ class ArchiverGUI(tk.Tk):
         )
         # Button to delete user
         tk.Button(
-            user_btn_frame,
-            text="Delete",
-            width=8,
-            command=lambda: self.delete_tree_item(
-                self.user_tree, self.backend.acm.users
-            ),
+            user_btn_frame, text="Delete", width=8, command=self.delete_user
         ).pack(side=tk.LEFT, padx=2)
 
         # Setup listing of user, access levels
@@ -160,7 +143,7 @@ class ArchiverGUI(tk.Tk):
         )
 
     def refresh_sub_trees(self):
-        """Helper to redraw users and documents if an Access Level is renamed."""
+        # Helper to redraw users and documents if an Access Level is renamed.
         for item in self.user_tree.get_children():
             self.user_tree.delete(item)
         for uid, udata in self.backend.acm.users.items():
@@ -172,20 +155,7 @@ class ArchiverGUI(tk.Tk):
             levels = self.backend.acm.documents.get(fid, [])
             self.doc_tree.insert("", "end", values=(fid, ", ".join(levels)))
 
-    def delete_tree_item(self, tree, data_struct, is_list=False):
-        selected = tree.selection()
-        if not selected:
-            return
-        item_text = tree.item(selected[0])["values"][0]
-        tree.delete(selected[0])
-        if is_list:
-            if item_text in data_struct:
-                data_struct.remove(item_text)
-        else:
-            if item_text in data_struct:
-                del data_struct[item_text]
-
-    # Methods for adding
+    # Addition methods
     def add_access_level(self):
         pop = tk.Toplevel(self)
         pop.title("Edit/Add Access Level")
@@ -196,6 +166,12 @@ class ArchiverGUI(tk.Tk):
 
         def apply():
             lvl = entry.get().strip()
+
+            # Prevent creation of 'Unassigned'
+            if lvl.lower() == "unassigned":
+                messagebox.showerror("Error", "'Unassigned' is a reserved system level.")
+                return
+              
             # Try adding the access level to the ACM
             if self.backend.acm.add_access_level(lvl):
                 # If it succeeds, update the access level treeview
@@ -292,6 +268,12 @@ class ArchiverGUI(tk.Tk):
 
         def apply():
             new_lvl = entry.get().strip()
+
+            # Prevent renaming to 'Unassigned'
+            if new_lvl.lower() == "unassigned":
+                messagebox.showerror("Error", "'Unassigned' is a reserved system level.")
+                return
+                
             # Try renaming the access level
             if self.backend.acm.rename_access_level(old_lvl, new_lvl):
                 # If successful, update all treeviews that are affected by the change
@@ -377,15 +359,97 @@ class ArchiverGUI(tk.Tk):
 
         tk.Button(pop, text="Apply", command=apply).pack(pady=5)
 
-    # If you're looking for deletion methods, they were passed as lambda functions in the
-    # GUI functions for deletion.
-    # TODO: Check and see if that was a good idea. Probably wasn't.
+    # Deletion methods
+    def delete_access_level(self):
+        selected = self.al_tree.selection()
+        if not selected:
+            return
+
+        lvl_to_delete = self.al_tree.item(selected[0])["values"][0]
+
+        # Identify any users that are currently using this access level
+        affected_users = [
+            uid
+            for uid, udata in self.backend.acm.users.items()
+            if udata["access_level"] == lvl_to_delete
+        ]
+
+        # Warn the user before proceeding with the deletion
+        if affected_users:
+            msg = (
+                f"The following users are currently assigned to '{lvl_to_delete}':\n"
+                f"{', '.join(affected_users)}\n\n"
+                f"Their access level will be changed to 'Unassigned'. Do you wish to proceed?"
+            )
+            if not messagebox.askyesno("Confirm Deletion", msg):
+                return
+            else:
+                if not messagebox.askyesno(
+                    "Confirm Deletion",
+                    f"Are you sure you want to delete the access level '{lvl_to_delete}'?",
+                ):
+                    return
+
+        # Remove from backend's main access level list
+        if lvl_to_delete in self.backend.acm.access_levels:
+            self.backend.acm.access_levels.remove(lvl_to_delete)
+
+        # Remove this access level from any documents through iteration
+        for fid, levels in self.backend.acm.files.items():
+            if lvl_to_delete in levels:
+                levels.remove(lvl_to_delete)
+
+        # Set affected users to "Unassigned"
+        for uid in affected_users:
+            self.backend.acm.users[uid]["access_level"] = "Unassigned"
+
+        # Remove from UI tree and refresh sub-trees
+        self.al_tree.delete(selected[0])
+        self.refresh_sub_trees()
+        
+    def delete_user(self):
+        selected = self.user_tree.selection()
+        if not selected:
+            return
+
+        uid = self.user_tree.item(selected[0])["values"][0]
+
+        # Remove from user list and access control
+        if uid in self.backend.acm.users:
+            del self.backend.acm.users[uid]
+
+        # Remove from UI tree
+        self.user_tree.delete(selected[0])
+    
+    def delete_document(self):
+        selected = self.doc_tree.selection()
+        if not selected:
+            return
+
+        fid = self.doc_tree.item(selected[0])["values"][0]
+
+        # Remove from file list and access control
+        if fid in self.backend.documents:
+            del self.backend.documents[fid]
+        if fid in self.backend.acm.files:
+            del self.backend.acm.files[fid]
+
+        # Remove from UI tree
+        self.doc_tree.delete(selected[0])
 
     # SDC export GUI function
     def export_sdc(self):
         if not self.backend.document_filepaths:
             messagebox.showerror("Error", "Add at least one document.")
             return
+
+        # Check for unassigned users before continuing
+        unassigned_users =[uid for uid, udata in self.backend.acm.users.items() if udata["access_level"] == "Unassigned"]
+        if unassigned_users:
+            msg = (f"Warning: There are {len(unassigned_users)} user(s) with an 'Unassigned' access level.\n\n"
+                   f"These users will NOT be able to view any documents. Do you want to continue exporting?")
+            if not messagebox.askyesno("Unassigned Users Detected", msg):
+                return
 
         pop = tk.Toplevel(self)
         pop.title("Export SDC")
