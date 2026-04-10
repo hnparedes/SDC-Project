@@ -368,11 +368,7 @@ class ArchiverGUI(tk.Tk):
         lvl_to_delete = self.al_tree.item(selected[0])["values"][0]
 
         # Identify any users that are currently using this access level
-        affected_users = [
-            uid
-            for uid, udata in self.backend.acm.users.items()
-            if udata["access_level"] == lvl_to_delete
-        ]
+        affected_users = self.backend.acm.get_users_with_access_level(lvl_to_delete)
 
         # Warn the user before proceeding with the deletion
         if affected_users:
@@ -390,22 +386,11 @@ class ArchiverGUI(tk.Tk):
                 ):
                     return
 
-        # Remove from backend's main access level list
-        if lvl_to_delete in self.backend.acm.access_levels:
-            self.backend.acm.access_levels.remove(lvl_to_delete)
-
-        # Remove this access level from any documents through iteration
-        for fid, levels in self.backend.acm.documents.items():
-            if lvl_to_delete in levels:
-                levels.remove(lvl_to_delete)
-
-        # Set affected users to "Unassigned"
-        for uid in affected_users:
-            self.backend.acm.users[uid]["access_level"] = "Unassigned"
-
-        # Remove from UI tree and refresh sub-trees
-        self.al_tree.delete(selected[0])
-        self.refresh_sub_trees()
+        # Attempt to delete the access level
+        if self.backend.acm.delete_access_level(lvl_to_delete):
+            # If successful, update the relevant treeviews
+            self.al_tree.delete(selected[0])
+            self.refresh_sub_trees()
 
     def delete_user(self):
         selected = self.user_tree.selection()
@@ -415,11 +400,9 @@ class ArchiverGUI(tk.Tk):
         uid = self.user_tree.item(selected[0])["values"][0]
 
         # Remove from user list and access control
-        if uid in self.backend.acm.users:
-            del self.backend.acm.users[uid]
-
-        # Remove from UI tree
-        self.user_tree.delete(selected[0])
+        if self.backend.acm.delete_user(uid):
+            # Remove from UI tree
+            self.user_tree.delete(selected[0])
 
     def delete_document(self):
         selected = self.doc_tree.selection()
@@ -429,13 +412,11 @@ class ArchiverGUI(tk.Tk):
         fid = self.doc_tree.item(selected[0])["values"][0]
 
         # Remove from file list and access control
-        if fid in self.backend.document_filepaths:
-            del self.backend.document_filepaths[fid]
-        if fid in self.backend.acm.documents:
-            del self.backend.acm.documents[fid]
-
-        # Remove from UI tree
-        self.doc_tree.delete(selected[0])
+        if self.backend.acm.delete_document(fid):
+            if fid in self.backend.document_filepaths:
+                del self.backend.document_filepaths[fid]
+            # Remove from UI tree
+            self.doc_tree.delete(selected[0])
 
     # SDC export GUI function
     def export_sdc(self):

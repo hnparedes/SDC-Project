@@ -146,6 +146,42 @@ class AccessControlMatrix:
         self.documents[doc_id] = access_levels
         return True
 
+    def get_users_with_access_level(self, lvl):
+        return [
+            uid
+            for uid, udata in self.users.items()
+            if udata["access_level"] == lvl
+        ]
+
+    def delete_access_level(self, lvl_to_delete):
+        # Remove from backend's main access level list
+        if lvl_to_delete in self.access_levels:
+            self.access_levels.remove(lvl_to_delete)
+
+        # Remove this access level from any documents through iteration
+        for fid, levels in self.documents.items():
+            if lvl_to_delete in levels:
+                levels.remove(lvl_to_delete)
+
+        affected_users = self.get_users_with_access_level(lvl_to_delete)
+        # Set affected users to "Unassigned"
+        for uid in affected_users:
+            self.users[uid]["access_level"] = "Unassigned"
+
+        return True
+
+    def delete_user(self, uid):
+        # Remove from user list and access control
+        if uid in self.users:
+            del self.users[uid]
+        return True
+
+    def delete_document(self, fid):
+        # Remove from file list and access control
+        if fid in self.documents:
+            del self.backend.acm.documents[fid]
+        return True
+
     # JSON formatting helper
     def to_json(self):
         return {
