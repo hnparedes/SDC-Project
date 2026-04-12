@@ -1,13 +1,4 @@
 import hashlib
-import json
-import os
-import shutil
-import tempfile
-
-import py7zr
-from Crypto.Cipher import AES
-from Crypto.Random import get_random_bytes
-from Crypto.Util.Padding import pad
 
 
 # Common backend class for ACM
@@ -125,9 +116,7 @@ class AccessControlMatrix:
             del self.users[old_uid]
 
         self.users[new_uid] = {
-            "password_hash": self.hash_password(new_pwd)
-            if new_pwd
-            else old_hash,
+            "password_hash": self.hash_password(new_pwd) if new_pwd else old_hash,
             "access_level": new_lvl,
         }
         return True
@@ -158,9 +147,7 @@ class AccessControlMatrix:
             return []
 
         return [
-            uid
-            for uid, udata in self.users.items()
-            if udata["access_level"] == lvl
+            uid for uid, udata in self.users.items() if udata["access_level"] == lvl
         ]
 
     def delete_access_level(self, lvl_to_delete):
