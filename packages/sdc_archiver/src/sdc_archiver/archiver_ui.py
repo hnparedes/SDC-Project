@@ -151,8 +151,8 @@ class ArchiverGUI(tk.Tk):
 
         for item in self.doc_tree.get_children():
             self.doc_tree.delete(item)
-        for fid in self.backend.documents.keys():
-            levels = self.backend.acm.files.get(fid, [])
+        for fid in self.backend.document_filepaths.keys():
+            levels = self.backend.acm.documents.get(fid, [])
             self.doc_tree.insert("", "end", values=(fid, ", ".join(levels)))
 
     # Addition methods
@@ -171,9 +171,10 @@ class ArchiverGUI(tk.Tk):
             if lvl.lower() == "unassigned":
                 messagebox.showerror("Error", "'Unassigned' is a reserved system level.")
                 return
-            
-            if lvl and lvl not in self.backend.acm.access_levels:
-                self.backend.acm.access_levels.append(lvl)
+
+            # Try adding the access level to the ACM
+            if self.backend.acm.add_access_level(lvl):
+                # If it succeeds, update the access level treeview
                 self.al_tree.insert("", "end", values=(lvl,))
             pop.destroy()
 
@@ -204,14 +205,14 @@ class ArchiverGUI(tk.Tk):
             usr = u_entry.get().strip()
             pwd = p_entry.get()
             lvl = cb.get()
-            if usr and pwd and lvl:
-                self.backend.acm.add_user(usr, pwd, lvl)
+            # Try adding the user to the ACM
+            if self.backend.acm.add_user(usr, pwd, lvl):
+                # If successful, update the user treeview
                 self.user_tree.insert("", "end", values=(usr, lvl, "***"))
             pop.destroy()
 
         tk.Button(pop, text="Apply", command=apply).pack(pady=10)
 
-    # Editing occurs here. Welp.
     def add_document(self):
         if not self.backend.acm.access_levels:
             messagebox.showerror("Error", "Create an Access Level first!")
@@ -236,9 +237,10 @@ class ArchiverGUI(tk.Tk):
 
         def apply():
             selected_levels = [lb.get(i) for i in lb.curselection()]
-            if selected_levels:
-                self.backend.documents[filename] = filepath
-                self.backend.acm.add_file_permission(filename, selected_levels)
+            # Try adding the document to the ACM
+            if self.backend.acm.add_document(filename, selected_levels):
+                # If successful, update the document treeview and record the file location
+                self.backend.document_filepaths[filename] = filepath
                 self.doc_tree.insert(
                     "", "end", values=(filename, ", ".join(selected_levels))
                 )
@@ -271,27 +273,10 @@ class ArchiverGUI(tk.Tk):
             if new_lvl.lower() == "unassigned":
                 messagebox.showerror("Error", "'Unassigned' is a reserved system level.")
                 return
-                
-            if (
-                new_lvl
-                and new_lvl != old_lvl
-                and new_lvl not in self.backend.acm.access_levels
-            ):
-                # Update backend
-                idx = self.backend.acm.access_levels.index(old_lvl)
-                self.backend.acm.access_levels[idx] = new_lvl
 
-                # Cascade change to users
-                for uid, udata in self.backend.acm.users.items():
-                    if udata["access_level"] == old_lvl:
-                        udata["access_level"] = new_lvl
-
-                # Cascade change to files
-                for fid, levels in self.backend.acm.files.items():
-                    if old_lvl in levels:
-                        levels[levels.index(old_lvl)] = new_lvl
-
-                # Update UI
+            # Try renaming the access level
+            if self.backend.acm.rename_access_level(old_lvl, new_lvl):
+                # If successful, update all treeviews that are affected by the change
                 self.al_tree.item(selected[0], values=(new_lvl,))
                 self.refresh_sub_trees()
             pop.destroy()
@@ -330,18 +315,9 @@ class ArchiverGUI(tk.Tk):
             new_pwd = p_entry.get()
             new_lvl = cb.get()
 
-            if new_uid and new_lvl:
-                old_hash = self.backend.acm.users[old_uid]["password_hash"]
-                if new_uid != old_uid:
-                    del self.backend.acm.users[old_uid]
-
-                self.backend.acm.users[new_uid] = {
-                    "password_hash": self.backend.acm.hash_password(new_pwd)
-                    if new_pwd
-                    else old_hash,
-                    "access_level": new_lvl,
-                }
-
+            # Try updating the user information
+            if self.backend.acm.update_user(old_uid, new_uid, new_pwd, new_lvl):
+                # If successful, update the user treeview
                 self.user_tree.item(selected[0], values=(new_uid, new_lvl, "***"))
             pop.destroy()
 
@@ -354,7 +330,7 @@ class ArchiverGUI(tk.Tk):
             return
 
         fid = self.doc_tree.item(selected[0])["values"][0]
-        current_levels = self.backend.acm.files.get(fid, [])
+        current_levels = self.backend.acm.documents.get(fid, [])
 
         pop = tk.Toplevel(self)
         pop.title("Edit Document")
@@ -373,8 +349,9 @@ class ArchiverGUI(tk.Tk):
 
         def apply():
             selected_levels = [lb.get(i) for i in lb.curselection()]
-            if selected_levels:
-                self.backend.acm.files[fid] = selected_levels
+            # Try updating the document permissions in the ACM
+            if self.backend.acm.set_document_perms(fid, selected_levels):
+                # If successful, update the document treeview and record the file location
                 self.doc_tree.item(
                     selected[0], values=(fid, ", ".join(selected_levels))
                 )
@@ -391,11 +368,7 @@ class ArchiverGUI(tk.Tk):
         lvl_to_delete = self.al_tree.item(selected[0])["values"][0]
 
         # Identify any users that are currently using this access level
-        affected_users = [
-            uid
-            for uid, udata in self.backend.acm.users.items()
-            if udata["access_level"] == lvl_to_delete
-        ]
+        affected_users = self.backend.acm.get_users_with_access_level(lvl_to_delete)
 
         # Warn the user before proceeding with the deletion
         if affected_users:
@@ -413,23 +386,12 @@ class ArchiverGUI(tk.Tk):
                 ):
                     return
 
-        # Remove from backend's main access level list
-        if lvl_to_delete in self.backend.acm.access_levels:
-            self.backend.acm.access_levels.remove(lvl_to_delete)
+        # Attempt to delete the access level
+        if self.backend.acm.delete_access_level(lvl_to_delete):
+            # If successful, update the relevant treeviews
+            self.al_tree.delete(selected[0])
+            self.refresh_sub_trees()
 
-        # Remove this access level from any documents through iteration
-        for fid, levels in self.backend.acm.files.items():
-            if lvl_to_delete in levels:
-                levels.remove(lvl_to_delete)
-
-        # Set affected users to "Unassigned"
-        for uid in affected_users:
-            self.backend.acm.users[uid]["access_level"] = "Unassigned"
-
-        # Remove from UI tree and refresh sub-trees
-        self.al_tree.delete(selected[0])
-        self.refresh_sub_trees()
-        
     def delete_user(self):
         selected = self.user_tree.selection()
         if not selected:
@@ -438,12 +400,10 @@ class ArchiverGUI(tk.Tk):
         uid = self.user_tree.item(selected[0])["values"][0]
 
         # Remove from user list and access control
-        if uid in self.backend.acm.users:
-            del self.backend.acm.users[uid]
+        if self.backend.acm.delete_user(uid):
+            # Remove from UI tree
+            self.user_tree.delete(selected[0])
 
-        # Remove from UI tree
-        self.user_tree.delete(selected[0])
-    
     def delete_document(self):
         selected = self.doc_tree.selection()
         if not selected:
@@ -452,17 +412,15 @@ class ArchiverGUI(tk.Tk):
         fid = self.doc_tree.item(selected[0])["values"][0]
 
         # Remove from file list and access control
-        if fid in self.backend.documents:
-            del self.backend.documents[fid]
-        if fid in self.backend.acm.files:
-            del self.backend.acm.files[fid]
-
-        # Remove from UI tree
-        self.doc_tree.delete(selected[0])
+        if self.backend.acm.delete_document(fid):
+            if fid in self.backend.document_filepaths:
+                del self.backend.document_filepaths[fid]
+            # Remove from UI tree
+            self.doc_tree.delete(selected[0])
 
     # SDC export GUI function
     def export_sdc(self):
-        if not self.backend.documents:
+        if not self.backend.document_filepaths:
             messagebox.showerror("Error", "Add at least one document.")
             return
 
