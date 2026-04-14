@@ -1,10 +1,13 @@
-from sdc_archiver.archiver_backend import SDCArchiver
 import os.path
+import time
 
+import pytest
+from sdc_archiver.archiver_backend import SDCArchiver
 from sdc_common_module.acm import AccessControlMatrix
 
 testfilepath = "./tests/testfiles/"
 testoutputpath = "./.test-output/"
+
 
 def test_add_access_level():
     acm = AccessControlMatrix()
@@ -12,13 +15,18 @@ def test_add_access_level():
     assert acm.add_access_level("test")
 
     # Access levels with nonunique names should be rejected
-    assert not acm.add_access_level("test")
+    with pytest.raises(Exception, match=r".*given name.*"):
+        acm.add_access_level("test")
+    # assert not acm.add_access_level("test")
 
     # Access levels with empty names should be rejected
-    assert not acm.add_access_level("")
+    with pytest.raises(Exception, match=r".*be empty.*"):
+        acm.add_access_level("")
 
     # Access levels with forbidden names should be rejected
-    assert not acm.add_access_level("Unassigned")
+    with pytest.raises(Exception, match=r".*Unassigned.*"):
+        acm.add_access_level("Unassigned")
+
 
 def test_rename_access_level():
     acm = AccessControlMatrix()
@@ -30,21 +38,27 @@ def test_rename_access_level():
     # Renaming an access level with a nonunique name should fail
     acm.add_access_level("test_a")
     acm.add_access_level("test_b")
-    assert not acm.rename_access_level("test_a", "test_b")
+    with pytest.raises(Exception, match=r".*already exists.*"):
+        acm.rename_access_level("test_a", "test_b")
 
     # Renaming an empty access level should fail
-    assert not acm.rename_access_level("", "something")
+    with pytest.raises(Exception, match=r".*does not exist.*"):
+        acm.rename_access_level("", "something")
 
     # Renaming a nonexistent access level should fail
-    assert not acm.rename_access_level("nonexistent", "nonexistent_renamed")
+    with pytest.raises(Exception, match=r".*does not exist.*"):
+        acm.rename_access_level("nonexistent", "nonexistent_renamed")
 
     # Renaming an access level to an empty name should fail
     acm.add_access_level("test_c")
-    assert not acm.rename_access_level("test_c", "")
+    with pytest.raises(Exception, match=r".*cannot be empty.*"):
+        acm.rename_access_level("test_c", "")
 
     # Renaming an access level to a forbidden name should fail
     acm.add_access_level("test_d")
-    assert not acm.rename_access_level("test_d", "Unassigned")
+    with pytest.raises(Exception, match=r".*Unassigned.*"):
+        acm.rename_access_level("test_d", "Unassigned")
+
 
 def test_access_level_rename_propagation():
     acm = AccessControlMatrix()
@@ -60,6 +74,7 @@ def test_access_level_rename_propagation():
     assert "test_renamed" in acm.documents["document"]
     assert "test" not in acm.documents["document"]
 
+
 def test_delete_access_level():
     acm = AccessControlMatrix()
 
@@ -72,10 +87,13 @@ def test_delete_access_level():
     assert "test" not in acm.access_levels
 
     # Deleting an access level with an empty name should fail
-    assert not acm.delete_access_level("")
+    with pytest.raises(Exception, match=r".*select.*"):
+        acm.delete_access_level("")
 
     # Deleting a nonexistent access level should fail
-    assert not acm.delete_access_level("nonexistent")
+    with pytest.raises(Exception, match=r".*does not exist.*"):
+        acm.delete_access_level("nonexistent")
+
 
 def test_access_level_delete_propagation():
     acm = AccessControlMatrix()
@@ -91,6 +109,7 @@ def test_access_level_delete_propagation():
     # Documents should have access levels removed from their access level list if they are deleted
     assert "test" not in acm.documents["document"]
 
+
 def test_add_user():
     acm = AccessControlMatrix()
     acm.add_access_level("test")
@@ -99,12 +118,15 @@ def test_add_user():
     assert acm.add_user("user", "password", "test")
 
     # Users with duplicate usernames should not be accepted
-    assert not acm.add_user("user", "password", "test")
+    with pytest.raises(Exception, match=r".*already exists.*"):
+        acm.add_user("user", "password", "test")
 
     # Users with empty usernames, passwords, or access levels should be rejected
-    assert not acm.add_user("", "password", "test")
-    assert not acm.add_user("user_a", "", "test")
-    assert not acm.add_user("user_b", "password", "")
+    with pytest.raises(Exception, match=r".*empty.*"):
+        acm.add_user("", "password", "test")
+        acm.add_user("user_a", "", "test")
+        acm.add_user("user_b", "password", "")
+
 
 def test_update_user():
     acm = AccessControlMatrix()
@@ -132,13 +154,16 @@ def test_update_user():
 
     # Updating a user with an empty username or access level should fail
     acm.add_user("user_c", "password", "test_a")
-    assert not acm.update_user("user_c", "", "new_password", "test_b")
-    assert not acm.update_user("user_c", "user_c_renamed", "new_password", "")
+    with pytest.raises(Exception, match=r".*empty.*"):
+        acm.update_user("user_c", "", "new_password", "test_b")
+        acm.update_user("user_c", "user_c_renamed", "new_password", "")
 
     # Updating a user with a username that already exists should fail
     acm.add_user("user_d", "password", "test_a")
     acm.add_user("user_e", "password", "test_a")
-    assert not acm.update_user("user_d", "user_e", "new_password", "test_b")
+    with pytest.raises(Exception, match=r".*already.*"):
+        acm.update_user("user_d", "user_e", "new_password", "test_b")
+
 
 def test_delete_user():
     acm = AccessControlMatrix()
@@ -152,10 +177,13 @@ def test_delete_user():
     assert "user" not in acm.users
 
     # Deleting a user with an empty name should fail
-    assert not acm.delete_access_level("")
+    with pytest.raises(Exception, match=r".*select.*"):
+        acm.delete_user("")
 
     # Deleting a nonexistent user should fail
-    assert not acm.delete_access_level("nonexistent")
+    with pytest.raises(Exception, match=r".*does not exist.*"):
+        acm.delete_user("nonexistent")
+
 
 def test_add_document():
     acm = AccessControlMatrix()
@@ -165,14 +193,18 @@ def test_add_document():
     assert acm.add_document("document", ["test"])
 
     # Documents with duplicate names should not be accepted
-    assert not acm.add_document("document", ["test"])
+    with pytest.raises(Exception, match=r".*already in.*"):
+        acm.add_document("document", ["test"])
 
     # Documents with empty names or access levels should not be accepted
-    assert not acm.add_document("", ["test"])
-    assert not acm.add_document("document_a", [])
+    with pytest.raises(Exception, match=r".*are empty.*"):
+        acm.add_document("", ["test"])
+        acm.add_document("document_a", [])
 
     # Documents with forbidden access levels should not be accepted
-    assert not acm.add_document("document_b", ["Unassigned"])
+    with pytest.raises(Exception, match=r".*reserved.*"):
+        acm.add_document("document_b", ["Unassigned"])
+
 
 def test_set_document_perms():
     acm = AccessControlMatrix()
@@ -186,13 +218,15 @@ def test_set_document_perms():
 
     # Changing a document's permissions to an empty set of access levels should fail
     acm.add_document("document_a", ["test_a"])
-    assert not acm.set_document_perms("document_a", [])
+    with pytest.raises(Exception, match=r".*No access.*"):
+        acm.set_document_perms("document_a", [])
 
     # Changing the permissions of an empty document should fail
-    assert not acm.set_document_perms("", ["test_a"])
+    with pytest.raises(Exception, match=r".*select.*"):
+        acm.set_document_perms("", ["test_a"])
+        # Changing the permissions of a nonexistent document should fail
+        acm.set_document_perms("nonexistent", ["test_a"])
 
-    # Changing the permissions of a nonexistent document should fail
-    assert not acm.set_document_perms("nonexistent", ["test_a"])
 
 def test_delete_document():
     acm = AccessControlMatrix()
@@ -206,10 +240,13 @@ def test_delete_document():
     assert "document" not in acm.documents
 
     # Deleting a document with an empty name should fail
-    assert not acm.delete_document("")
+    with pytest.raises(Exception, match=r".*select.*"):
+        acm.delete_document("")
 
     # Deleting a nonexistent document should fail
-    assert not acm.delete_document("nonexistent")
+    with pytest.raises(Exception, match=r".*not exist.*"):
+        acm.delete_document("nonexistent")
+
 
 def test_acm():
     archiver = SDCArchiver()
@@ -223,10 +260,15 @@ def test_acm():
     archiver.acm.documents[testfile] = [access_level]
 
     # Are passwords hashed consistently?
-    assert archiver.acm.users[username]["password_hash"] == archiver.acm.hash_password(password)
+    assert archiver.acm.users[username]["password_hash"] == archiver.acm.hash_password(
+        password
+    )
 
-    os.mkdir(testoutputpath)
-    outputpath = testoutputpath + "output.7z"
+    try:
+        os.mkdir(testoutputpath)
+    except FileExistsError:
+        pass
+    outputpath = testoutputpath + "output-" + time.strftime("%Y%m%d-%H%M%S") + ".7z"
 
     # Does exporting an archive create a file?
     archiver.export_archive(outputpath, "password")
