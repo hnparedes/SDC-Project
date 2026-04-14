@@ -26,6 +26,9 @@ class AccessControlMatrix:
                 "Access Level with given name already exists. Please choose a different name."
             )
 
+        if lvl.lower() == "unassigned":
+            raise Exception("'Unassigned' is a reserved system level")
+
         self.access_levels.append(lvl)
         return True
 
@@ -67,7 +70,9 @@ class AccessControlMatrix:
                 "This document is already in the SDC Archive. Please choose a different document."
             )
 
-        # TODO: Reject the document if access_levels contains the error access level
+        for a in access_levels:
+            if a.lower() == "unassigned":
+                raise Exception("'Unassigned' is a reserved system level.")
 
         self.documents[doc_id] = access_levels
         return True
@@ -94,6 +99,9 @@ class AccessControlMatrix:
             raise Exception(
                 "The provided name already exists in the access level list. Please input a new name."
             )
+
+        if new_lvl.lower() == "unassigned":
+            raise Exception("'Unassigned' is a reserved system level")
 
         # Change the access level name
         idx = self.access_levels.index(old_lvl)
@@ -150,9 +158,7 @@ class AccessControlMatrix:
 
         # Does the document we are changing the permissions of exist?
         if doc_id not in self.documents:
-            raise Exception(
-                "The document you are trying to edit does not exist. Please select an already existing document."
-            )
+            raise Exception("Please select an already existing document.")
 
         # TODO: Reject the document if access_levels contains the error access level
 
@@ -177,7 +183,7 @@ class AccessControlMatrix:
     def delete_access_level(self, lvl_to_delete):
         # Is the level name nonempty?
         if not lvl_to_delete:
-            raise Exception("The access level list is empty.")
+            raise Exception("Please select an access level to delete.")
 
         # Does the access level exist?
         if lvl_to_delete not in self.access_levels:
@@ -205,7 +211,7 @@ class AccessControlMatrix:
     def delete_user(self, uid):
         # Is the user ID nonempty?
         if not uid:
-            raise Exception("The user list is empty.")
+            raise Exception("Please select a user to delete.")
 
         # Does the user exist?
         if uid not in self.users:
@@ -221,7 +227,7 @@ class AccessControlMatrix:
     def delete_document(self, fid):
         # Is the document ID nonempty?
         if not fid:
-            raise Exception("The document list is empty.")
+            raise Exception("Please select a document.")
 
         # Does the document exist?
         if fid not in self.documents:

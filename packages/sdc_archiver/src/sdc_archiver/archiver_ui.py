@@ -170,11 +170,6 @@ class ArchiverGUI(tk.Tk):
             lvl = entry.get().strip()
 
             # Prevent creation of 'Unassigned'
-            if lvl.lower() == "unassigned":
-                messagebox.showerror(
-                    "Error", "'Unassigned' is a reserved system level."
-                )
-                return
 
             # Try adding the access level to the ACM
             try:
@@ -281,13 +276,6 @@ class ArchiverGUI(tk.Tk):
 
         def apply():
             new_lvl = entry.get().strip()
-
-            # Prevent renaming to 'Unassigned'
-            if new_lvl.lower() == "unassigned":
-                messagebox.showerror(
-                    "Error", "'Unassigned' is a reserved system level."
-                )
-                return
 
             # Try renaming the access level
             try:
