@@ -37,9 +37,9 @@ class SDCViewer:
             with open(os.path.join(self.contents_dir, "key_lib.json"), "r") as f:
                 self.key_library = json.load(f)
             return True
-        except py7zr.exceptions.BadPassword:
-            self.close()
-            return False
+        # except py7zr.exceptions.BadPassword:
+        # self.close()
+        # return False
         except Exception as e:
             self.close()
             raise e
@@ -56,7 +56,7 @@ class SDCViewer:
     def get_accessible_files(self):
         return [
             fid
-            for fid, levels in self.acm.files.items()
+            for fid, levels in self.acm.documents.items()
             if self.current_user_level in levels
         ]
 
@@ -68,7 +68,7 @@ class SDCViewer:
 
             # Read encrypted file in binary mode
             with open(enc_filepath, "rb") as f:
-            # IV -> Initialization Vector
+                # IV -> Initialization Vector
                 iv = f.read(16)
                 ciphertext = f.read()
 

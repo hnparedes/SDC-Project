@@ -62,7 +62,8 @@ class ArchiverGUI(tk.Tk):
         )
         # Button to delete document
         tk.Button(
-            doc_btn_frame, text="Delete", width=8, command=self.delete_document).pack(side=tk.LEFT, padx=2)
+            doc_btn_frame, text="Delete", width=8, command=self.delete_document
+        ).pack(side=tk.LEFT, padx=2)
 
         # List out files along their access level
         self.doc_tree = ttk.Treeview(
@@ -88,7 +89,8 @@ class ArchiverGUI(tk.Tk):
         ).pack(side=tk.LEFT, padx=2)
         # Delete access levels
         tk.Button(
-            al_btn_frame, text="Delete", width=8, command=self.delete_access_level).pack(side=tk.LEFT, padx=2)
+            al_btn_frame, text="Delete", width=8, command=self.delete_access_level
+        ).pack(side=tk.LEFT, padx=2)
 
         self.al_tree = ttk.Treeview(al_frame, columns=("Name",), show="headings")
         self.al_tree.heading("Name", text="Name")
@@ -168,15 +170,15 @@ class ArchiverGUI(tk.Tk):
             lvl = entry.get().strip()
 
             # Prevent creation of 'Unassigned'
-            if lvl.lower() == "unassigned":
-                messagebox.showerror("Error", "'Unassigned' is a reserved system level.")
-                return
 
             # Try adding the access level to the ACM
-            if self.backend.acm.add_access_level(lvl):
+            try:
+                self.backend.acm.add_access_level(lvl)
                 # If it succeeds, update the access level treeview
                 self.al_tree.insert("", "end", values=(lvl,))
-            pop.destroy()
+                pop.destroy()
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
 
         tk.Button(pop, text="Apply", command=apply).pack(pady=10)
 
@@ -206,10 +208,13 @@ class ArchiverGUI(tk.Tk):
             pwd = p_entry.get()
             lvl = cb.get()
             # Try adding the user to the ACM
-            if self.backend.acm.add_user(usr, pwd, lvl):
+            try:
+                self.backend.acm.add_user(usr, pwd, lvl)
                 # If successful, update the user treeview
                 self.user_tree.insert("", "end", values=(usr, lvl, "***"))
-            pop.destroy()
+                pop.destroy()
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
 
         tk.Button(pop, text="Apply", command=apply).pack(pady=10)
 
@@ -238,13 +243,16 @@ class ArchiverGUI(tk.Tk):
         def apply():
             selected_levels = [lb.get(i) for i in lb.curselection()]
             # Try adding the document to the ACM
-            if self.backend.acm.add_document(filename, selected_levels):
+            try:
+                self.backend.acm.add_document(filename, selected_levels)
                 # If successful, update the document treeview and record the file location
                 self.backend.document_filepaths[filename] = filepath
                 self.doc_tree.insert(
                     "", "end", values=(filename, ", ".join(selected_levels))
                 )
-            pop.destroy()
+                pop.destroy()
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
 
         tk.Button(pop, text="Apply", command=apply).pack(pady=5)
 
@@ -269,17 +277,15 @@ class ArchiverGUI(tk.Tk):
         def apply():
             new_lvl = entry.get().strip()
 
-            # Prevent renaming to 'Unassigned'
-            if new_lvl.lower() == "unassigned":
-                messagebox.showerror("Error", "'Unassigned' is a reserved system level.")
-                return
-
             # Try renaming the access level
-            if self.backend.acm.rename_access_level(old_lvl, new_lvl):
+            try:
+                self.backend.acm.rename_access_level(old_lvl, new_lvl)
                 # If successful, update all treeviews that are affected by the change
                 self.al_tree.item(selected[0], values=(new_lvl,))
                 self.refresh_sub_trees()
-            pop.destroy()
+                pop.destroy()
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
 
         tk.Button(pop, text="Apply", command=apply).pack(pady=10)
 
@@ -316,10 +322,13 @@ class ArchiverGUI(tk.Tk):
             new_lvl = cb.get()
 
             # Try updating the user information
-            if self.backend.acm.update_user(old_uid, new_uid, new_pwd, new_lvl):
+            try:
+                self.backend.acm.update_user(old_uid, new_uid, new_pwd, new_lvl)
                 # If successful, update the user treeview
                 self.user_tree.item(selected[0], values=(new_uid, new_lvl, "***"))
-            pop.destroy()
+                pop.destroy()
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
 
         tk.Button(pop, text="Apply", command=apply).pack(pady=10)
 
@@ -350,12 +359,15 @@ class ArchiverGUI(tk.Tk):
         def apply():
             selected_levels = [lb.get(i) for i in lb.curselection()]
             # Try updating the document permissions in the ACM
-            if self.backend.acm.set_document_perms(fid, selected_levels):
+            try:
+                self.backend.acm.set_document_perms(fid, selected_levels)
                 # If successful, update the document treeview and record the file location
                 self.doc_tree.item(
                     selected[0], values=(fid, ", ".join(selected_levels))
                 )
-            pop.destroy()
+                pop.destroy()
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
 
         tk.Button(pop, text="Apply", command=apply).pack(pady=5)
 
@@ -387,10 +399,13 @@ class ArchiverGUI(tk.Tk):
                     return
 
         # Attempt to delete the access level
-        if self.backend.acm.delete_access_level(lvl_to_delete):
+        try:
+            self.backend.acm.delete_access_level(lvl_to_delete)
             # If successful, update the relevant treeviews
             self.al_tree.delete(selected[0])
             self.refresh_sub_trees()
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
 
     def delete_user(self):
         selected = self.user_tree.selection()
@@ -400,9 +415,12 @@ class ArchiverGUI(tk.Tk):
         uid = self.user_tree.item(selected[0])["values"][0]
 
         # Remove from user list and access control
-        if self.backend.acm.delete_user(uid):
+        try:
+            self.backend.acm.delete_user(uid)
             # Remove from UI tree
             self.user_tree.delete(selected[0])
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
 
     def delete_document(self):
         selected = self.doc_tree.selection()
@@ -412,11 +430,14 @@ class ArchiverGUI(tk.Tk):
         fid = self.doc_tree.item(selected[0])["values"][0]
 
         # Remove from file list and access control
-        if self.backend.acm.delete_document(fid):
+        try:
+            self.backend.acm.delete_document(fid)
             if fid in self.backend.document_filepaths:
                 del self.backend.document_filepaths[fid]
             # Remove from UI tree
             self.doc_tree.delete(selected[0])
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
 
     # SDC export GUI function
     def export_sdc(self):
@@ -425,10 +446,16 @@ class ArchiverGUI(tk.Tk):
             return
 
         # Check for unassigned users before continuing
-        unassigned_users =[uid for uid, udata in self.backend.acm.users.items() if udata["access_level"] == "Unassigned"]
+        unassigned_users = [
+            uid
+            for uid, udata in self.backend.acm.users.items()
+            if udata["access_level"] == "Unassigned"
+        ]
         if unassigned_users:
-            msg = (f"Warning: There are {len(unassigned_users)} user(s) with an 'Unassigned' access level.\n\n"
-                   f"These users will NOT be able to view any documents. Do you want to continue exporting?")
+            msg = (
+                f"Warning: There are {len(unassigned_users)} user(s) with an 'Unassigned' access level.\n\n"
+                f"These users will NOT be able to view any documents. Do you want to continue exporting?"
+            )
             if not messagebox.askyesno("Unassigned Users Detected", msg):
                 return
 
