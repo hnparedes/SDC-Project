@@ -40,9 +40,10 @@ class SDCViewer:
             with open(os.path.join(self.contents_dir, "key_lib.json"), "r") as f:
                 self.key_library = json.load(f)
             return True
-        # except py7zr.exceptions.BadPassword:
-        # self.close()
-        # return False
+        except py7zr.exceptions.PasswordRequired:
+        # TODO: This should be handled better.
+        self.close()
+        return False
         except Exception as e:
             self.close()
             raise e
