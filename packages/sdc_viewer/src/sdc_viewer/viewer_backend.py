@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import shutil
@@ -24,10 +25,12 @@ class SDCViewer:
 
     # Function to open and attempt to access the SDC at the 7zip level
     def open_archive(self, archive_name, archive_password):
+        # Use entered password as a hash for 7z decryption
+        hashed_password = hashlib.sha256(archive_password.encode()).hexdigest()
         self.temp_dir = tempfile.mkdtemp(prefix=".tempdir_viewer_")
         try:
             with py7zr.SevenZipFile(
-                archive_name, "r", password=archive_password
+                archive_name, "r", password=hashed_password
             ) as archive:
                 archive.extractall(path=self.temp_dir)
             self.contents_dir = os.path.join(self.temp_dir, "sdc_contents")
