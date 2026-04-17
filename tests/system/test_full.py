@@ -27,10 +27,10 @@ def test_full():
 	archiver.acm.add_user("delilah", "guess", "admin")
 
 	# Add some documents
-	archiver.acm.add_document("text_normal_1.txt", ["guest", "default", "privlieged", "admin"])
-	archiver.acm.add_document("text_normal_2.txt", ["guest", "default", "privlieged"])
-	archiver.acm.add_document("text_normal_3.txt", ["guest"])
-	archiver.acm.add_document("text_normal_4.txt", ["guest", "default"])
+	archiver.acm.add_document("text_normal_1.txt", ["admin", "privlieged", "default", "guest"])
+	archiver.acm.add_document("text_normal_2.txt", ["admin", "privlieged", "default"])
+	archiver.acm.add_document("text_normal_3.txt", ["admin"])
+	archiver.acm.add_document("text_normal_4.txt", ["admin", "privlieged"])
 
 	# Having to do this is one of the main reasons I care about issue #13
 	archiver.document_filepaths = {
@@ -43,8 +43,14 @@ def test_full():
 	# Oops, some of the data we entered into the archiver is wrong.
 	# Let's test a bunch of ACM functions:
 
-	# Correct a typo in an access level name
+	# Simulate a user trying to fumble around to fix an error:
+	# I need to correct a typo in an access level name
+	archiver.acm.add_access_level("privileged")
+	# Wait, that isn't what I wanted to do. I wanted to rename the misspelled access level
+	# For some reason it won't let me name it 'privileged'
 	archiver.acm.rename_access_level("privlieged", "privilged")
+	# Oh wait, I need to delete the new one I made.
+	archiver.acm.delete_access_level("privileged")
 	# Someone's going to get fired for this
 	archiver.acm.rename_access_level("privilged", "privileged")
 
@@ -74,12 +80,7 @@ def test_full():
 	# We're done updating the ACM, so let's export the archive
 	archiveoutputpath =	testoutputpath + "test_full" + time.strftime("%Y%m%d-%H%M%S") + "/"
 	archivepath = archiveoutputpath + "normalsdc.7z"
-
-	try:
-		os.mkdir(archiveoutputpath)
-		os.mkdir(testoutputpath)
-	except FileExistsError:
-		pass
+	os.makedirs(archiveoutputpath, exist_ok=True)
 
 	archiver.export_archive(archivepath, "sonormal")
 
@@ -92,12 +93,13 @@ def test_full():
 	# Bob is logging in
 	viewer.login("bob", "opensesame")
 
-	# Bob extracts text_normal_3.txt
-	viewer.extract_document("text_normal_3.txt", archiveoutputpath + "text_normal_3.txt")
+	# Bob extracts text_normal_2.txt
+	viewer.extract_document("text_normal_2.txt", archiveoutputpath + "text_normal_2.txt")
 
 	# Bob closes the viewer
 	viewer.close()
 
 	# Bob confirms that the file was extracted properly by hastily reading the first line
-	filecontents = open(archiveoutputpath + "text_normal_3.txt").read()
-	assert "I walked into the shop and looked at some jewelry." in filecontents
+	assert "Lorem ipsum dolor sit amet." in open(archiveoutputpath + "text_normal_2.txt").read()
+
+	# Godspeed, Bob.

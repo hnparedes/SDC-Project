@@ -25,7 +25,10 @@ def test_archiver():
         os.mkdir(testoutputpath)
     except FileExistsError:
         pass
-    outputpath = testoutputpath + "output-" + time.strftime("%Y%m%d-%H%M%S") + ".7z"
+
+    archiveoutputpath = testoutputpath + "test_archiver" + time.strftime("%Y%m%d-%H%M%S") + "/"
+    os.makedirs(archiveoutputpath, exist_ok=True)
+    outputpath = archiveoutputpath + "output-.7z"
 
     # Does exporting an archive create a file?
     archiver.export_archive(outputpath, "password")
