@@ -204,7 +204,7 @@ class AccessControlMatrix:
 
             # If no access level remain, assign "Unassigned"
             if not levels:
-                self.document[fid] = ["Unassigned"]
+                self.documents[fid] = ["Unassigned"]
 
         return True
 
