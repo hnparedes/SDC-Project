@@ -1,0 +1,103 @@
+import os.path
+import time
+
+import pytest
+from sdc_archiver.archiver_backend import SDCArchiver
+from sdc_viewer.viewer_backend import SDCViewer
+
+testfilepath = "./tests/testfiles/"
+testoutputpath = "./.test-output/"
+
+# Simulates a full session of use of the SDC Suite, using all features of both programs.
+# This test only attempts valid inputs. No errors should occur while this test runs.
+def test_full():
+	archiver = SDCArchiver()
+
+	# Add some access levels
+	archiver.acm.add_access_level("admin")
+	# The typo is intentional
+	archiver.acm.add_access_level("privlieged")
+	archiver.acm.add_access_level("default")
+	archiver.acm.add_access_level("guest")
+
+	# Add some users
+	archiver.acm.add_user("alice", "letmein", "privlieged")
+	archiver.acm.add_user("bpb", "opensesame", "privlieged")
+	archiver.acm.add_user("charles", "N!t7'^q>3{;8/52WnXIf", "default")
+	archiver.acm.add_user("delilah", "guess", "admin")
+
+	# Add some documents
+	archiver.acm.add_document("text_normal_1.txt", ["guest", "default", "privlieged", "admin"])
+	archiver.acm.add_document("text_normal_2.txt", ["guest", "default", "privlieged"])
+	archiver.acm.add_document("text_normal_3.txt", ["guest"])
+	archiver.acm.add_document("text_normal_4.txt", ["guest", "default"])
+
+	# Having to do this is one of the main reasons I care about issue #13
+	archiver.document_filepaths = {
+		"text_normal_1.txt": testfilepath + "files/text_normal_1.txt",
+		"text_normal_2.txt": testfilepath + "files/text_normal_2.txt",
+		"text_normal_3.txt": testfilepath + "files/text_normal_3.txt",
+		"text_normal_4.txt": testfilepath + "files/text_normal_4.txt",
+	}
+
+	# Oops, some of the data we entered into the archiver is wrong.
+	# Let's test a bunch of ACM functions:
+
+	# Correct a typo in an access level name
+	archiver.acm.rename_access_level("privlieged", "privilged")
+	# Someone's going to get fired for this
+	archiver.acm.rename_access_level("privilged", "privileged")
+
+	# Delete an access level that we didn't need
+	archiver.acm.delete_access_level("guest")
+
+	# Whoops, Bob misspelled his name. I think I know who's getting fired.
+	# We don't need to change his password, though
+	archiver.acm.update_user("bpb", "bob", "", "privileged")
+
+	# Turns out Charlie prefers going by his nickname, let's update his username
+	# He also forgot his password, and asked to change it to something easier-to-remember
+	archiver.acm.update_user("charles", "charlie", "password", "default")
+
+	# Delilah left the project, so let's remove her from the ACM
+	archiver.acm.delete_user("delilah")
+
+	# Alice got promoted after Delilah left, so she's taking over the admin role
+	archiver.acm.update_user("alice", "alice", "", "admin")
+
+	# Our legal team found out text_normal_4.txt has copyrighted content, so it must be removed
+	archiver.acm.delete_document("text_normal_4.txt")
+
+	# After removing the guest access level, text_normal_3.txt is unassigned. Let's fix that
+	archiver.acm.set_document_perms("text_normal_3.txt", ["default"])
+
+	# We're done updating the ACM, so let's export the archive
+	archiveoutputpath =	testoutputpath + "test_full" + time.strftime("%Y%m%d-%H%M%S") + "/"
+	archivepath = archiveoutputpath + "normalsdc.7z"
+
+	try:
+		os.mkdir(archiveoutputpath)
+		os.mkdir(testoutputpath)
+	except FileExistsError:
+		pass
+
+	archiver.export_archive(archivepath, "sonormal")
+
+	# Now that the archive is done, let's test the viewer.
+	viewer = SDCViewer()
+
+	# Open the archive
+	viewer.open_archive(archivepath, "sonormal")
+
+	# Bob is logging in
+	viewer.login("bob", "opensesame")
+
+	# Bob extracts text_normal_3.txt
+	viewer.extract_document("text_normal_3.txt", archiveoutputpath + "text_normal_3.txt")
+
+	# Bob closes the viewer
+	viewer.close()
+
+	# Bob confirms that the file was extracted properly by hastily reading the first line
+	filecontents = open(archiveoutputpath + "text_normal_3.txt").read()
+	assert "I walked into the shop and looked at some jewelry." in filecontents
