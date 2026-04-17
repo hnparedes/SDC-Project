@@ -37,7 +37,7 @@ class SDCArchiver:
                 encrypted_data = self.crypto.encrypt_data(plaintext_data, key)
 
                 # Ensure encryption actually changed the data
-                if encrypted_data[16:] == plaintext:
+                if encrypted_data[16:] == plaintext_data:
                     raise Exception(f"Encryption failed for {fid}")
 
                 with open(os.path.join(temp_dir, fid), "wb") as f:
