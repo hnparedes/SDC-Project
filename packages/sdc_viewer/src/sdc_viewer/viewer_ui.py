@@ -63,12 +63,13 @@ class ViewerGUI(tk.Tk):
         if not path or not pwd:
             messagebox.showwarning("Warning", "Please provide location and key.")
             return
-
-        if self.backend.open_archive(path, pwd):
-            self.title(f"SDC Viewer - {os.path.basename(path)}")
-            self.create_auth_widgets()
-        else:
-            messagebox.showerror("Error", "Invalid Archive Key or corrupt SDC.")
+        try:
+            if self.backend.open_archive(path, pwd):
+                self.title(f"SDC Viewer - {os.path.basename(path)}")
+                self.create_auth_widgets()
+        except Exception as e:
+            messagebox.showerror("Error", f"{e}")
+            return
 
     # Window for ACM authenciation
     def create_auth_widgets(self):
@@ -90,11 +91,13 @@ class ViewerGUI(tk.Tk):
 
         # Function to attempt ACM authenication
         def attempt_login():
-            if self.backend.login(u_entry.get(), p_entry.get()):
+            try:
+                self.backend.login(u_entry.get(), p_entry.get())
                 # Create extraction window upon success
                 self.create_extraction_widgets()
-            else:
+            except Exception as e:
                 messagebox.showerror("Error", "Login Failed. Invalid credentials.")
+                return
 
         # Buttons to cancel authenication or to attempt login
         btn_frame = tk.Frame(self)

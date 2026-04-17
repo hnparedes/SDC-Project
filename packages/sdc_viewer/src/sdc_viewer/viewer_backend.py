@@ -40,21 +40,25 @@ class SDCViewer:
             with open(os.path.join(self.contents_dir, "key_lib.json"), "r") as f:
                 self.key_library = json.load(f)
             return True
-        except py7zr.exceptions.PasswordRequired:
+        except py7zr.exceptions.PasswordRequired as py7z:
             # TODO: This should be handled better.
+            #From Nathan: if you meant the false return, I fixed that
             self.close()
-            return False
+            raise py7z
         except Exception as e:
             self.close()
             raise e
 
     # Function to authenicate with SDC
     def login(self, uid, password):
-        user = self.acm.users.get(uid)
-        if user and user["password_hash"] == self.acm.hash_password(password):
-            self.current_user_level = user["access_level"]
-            return True
-        return False
+        try:
+            user = self.acm.users.get(uid)
+            if user and user["password_hash"] == self.acm.hash_password(password):
+                self.current_user_level = user["access_level"]
+                return True
+        except Exception as e:
+            #cannot access username or password is incorrect
+            raise Exception(f"Login failed: {e}")
 
     # Function to only access files (their titles specifically) permitted from the user's access levels
     def get_accessible_files(self):
