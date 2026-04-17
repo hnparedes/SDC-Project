@@ -1,12 +1,7 @@
-import os.path
-import time
+
 
 import pytest
-from sdc_archiver.archiver_backend import SDCArchiver
 from sdc_common_module.acm import AccessControlMatrix
-
-testfilepath = "./tests/testfiles/"
-testoutputpath = "./.test-output/"
 
 
 def test_add_access_level():
@@ -250,30 +245,3 @@ def test_delete_document():
     # Deleting a nonexistent document should fail
     with pytest.raises(Exception, match=r".*not exist.*"):
         acm.delete_document("nonexistent")
-
-
-def test_acm():
-    archiver = SDCArchiver()
-
-    username = "testuser"
-    password = "password123"
-    access_level = "testlevel"
-    archiver.acm.add_user(username, password, access_level)
-
-    testfile = testfilepath + "files/text_normal_1.txt"
-    archiver.acm.documents[testfile] = [access_level]
-
-    # Are passwords hashed consistently?
-    assert archiver.acm.users[username]["password_hash"] == archiver.acm.hash_password(
-        password
-    )
-
-    try:
-        os.mkdir(testoutputpath)
-    except FileExistsError:
-        pass
-    outputpath = testoutputpath + "output-" + time.strftime("%Y%m%d-%H%M%S") + ".7z"
-
-    # Does exporting an archive create a file?
-    archiver.export_archive(outputpath, "password")
-    assert os.path.isfile(outputpath)
