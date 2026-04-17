@@ -99,8 +99,10 @@ def test_access_level_delete_propagation():
     acm = AccessControlMatrix()
 
     acm.add_access_level("test")
+    acm.add_access_level("test2")
     acm.add_user("user", "password", "test")
-    acm.add_document("document", ["test"])
+    acm.add_document("document", ["test", "test2"])
+    acm.add_document("document2", ["test"])
 
     acm.delete_access_level("test")
 
@@ -108,6 +110,8 @@ def test_access_level_delete_propagation():
     assert acm.users["user"]["access_level"] == "Unassigned"
     # Documents should have access levels removed from their access level list if they are deleted
     assert "test" not in acm.documents["document"]
+    # If a document's only access level is deleted, its access level list should be set to Unassigned
+    assert "Unassigned" in acm.documents["document2"]
 
 
 def test_add_user():
