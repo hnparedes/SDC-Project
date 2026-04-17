@@ -202,9 +202,9 @@ class AccessControlMatrix:
             if lvl_to_delete in levels:
                 levels.remove(lvl_to_delete)
 
-        # Set affected users to "Unassigned"
-        for uid in affected_users:
-            self.users[uid]["access_level"] = "Unassigned"
+            # If no access level remain, assign "Unassigned"
+            if not levels:
+                self.document[fid] = ["Unassigned"]
 
         return True
 
