@@ -99,7 +99,7 @@ def test_full():
 	# Bob closes the viewer
 	viewer.close()
 
-	# Bob confirms that the file was extracted properly by hastily reading the first line
+	# Bob confirms that the document was extracted properly by hastily reading the first line
 	assert "Lorem ipsum dolor sit amet." in open(archiveoutputpath + "text_normal_2.txt").read()
 
 	# Godspeed, Bob.
