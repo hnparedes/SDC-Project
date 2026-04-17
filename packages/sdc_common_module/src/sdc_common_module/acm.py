@@ -206,6 +206,10 @@ class AccessControlMatrix:
             if not levels:
                 self.documents[fid] = ["Unassigned"]
 
+        # Set affected users to "Unassigned"
+        for uid in affected_users:
+            self.users[uid]["access_level"] = "Unassigned"
+
         return True
 
     def delete_user(self, uid):
