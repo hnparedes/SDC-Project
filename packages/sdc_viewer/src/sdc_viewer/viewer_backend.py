@@ -7,9 +7,8 @@ import tempfile
 # For 7zip support
 import py7zr
 
-# PyCryptodome for hashing
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import unpad
+# Import ACM and crypto for the viewer's later usage
+from sdc_common_module.crypto import CryptoSDC
 from sdc_common_module.acm import AccessControlMatrix
 
 
@@ -19,6 +18,7 @@ class SDCViewer:
         # Setup variables for the viewer's later usage.
         self.temp_dir = None
         self.acm = AccessControlMatrix()
+        self.crypto = CryptoSDC()
         self.key_library = {}
         self.current_user_level = None
         self.contents_dir = None
@@ -72,17 +72,14 @@ class SDCViewer:
 
             # Read encrypted file in binary mode
             with open(enc_filepath, "rb") as f:
-                # IV -> Initialization Vector
-                iv = f.read(16)
-                ciphertext = f.read()
+                encrypted_data = f.read()
 
             # Validate encrypted structure
-            if len(ciphertext) == 0:
+            if len(encrypted_data) == 0:
                 raise Exception("File is not properly encrypted or is corrupted")
 
-            # Decrypt the file
-            cipher = AES.new(key, AES.MODE_CBC, iv=iv)
-            decrypted_data = unpad(cipher.decrypt(ciphertext), AES.block_size)
+            # Decrypt encrypted data
+            decrypted_data = self.crypto.decrypt_data(encrypted_data, key)
 
             # Write decrypted file in byte mode
             with open(dest_path, "wb") as f:
