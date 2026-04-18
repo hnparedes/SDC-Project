@@ -481,6 +481,9 @@ class ArchiverGUI(tk.Tk):
         pop = tk.Toplevel(self)
         pop.title("Export SDC")
         pop.geometry("350x150")
+        pop.transient(self)
+        pop.grab_set()
+        pop.resizable(False, False)
 
         tk.Label(pop, text="Archive Key (Password):").pack(pady=5)
         pw_entry = tk.Entry(pop, show="*")
