@@ -123,7 +123,9 @@ def test_add_user():
     # Users with empty usernames, passwords, or access levels should be rejected
     with pytest.raises(Exception, match=r".*empty.*"):
         acm.add_user("", "password", "test")
+    with pytest.raises(Exception, match=r".*empty.*"):
         acm.add_user("user_a", "", "test")
+    with pytest.raises(Exception, match=r".*empty.*"):
         acm.add_user("user_b", "password", "")
 
 
