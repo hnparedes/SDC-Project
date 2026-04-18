@@ -14,7 +14,7 @@ def test_archiver():
     archiver.acm.add_user(username, password, access_level)
 
     testfile = testfilepath + "files/text_normal_1.txt"
-    archiver.acm.documents[testfile] = [access_level]
+    archiver.acm.add_document("text_normal_1.txt", [access_level], testfile)
 
     # Are passwords hashed consistently?
     assert archiver.acm.users[username]["password_hash"] == archiver.acm.hash_password(

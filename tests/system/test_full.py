@@ -27,18 +27,10 @@ def test_full():
 	archiver.acm.add_user("delilah", "guess", "admin")
 
 	# Add some documents
-	archiver.acm.add_document("text_normal_1.txt", ["admin", "privlieged", "default", "guest"])
-	archiver.acm.add_document("text_normal_2.txt", ["admin", "privlieged", "default"])
-	archiver.acm.add_document("text_normal_3.txt", ["admin"])
-	archiver.acm.add_document("text_normal_4.txt", ["admin", "privlieged"])
-
-	# Having to do this is one of the main reasons I care about issue #13
-	archiver.document_filepaths = {
-		"text_normal_1.txt": testfilepath + "files/text_normal_1.txt",
-		"text_normal_2.txt": testfilepath + "files/text_normal_2.txt",
-		"text_normal_3.txt": testfilepath + "files/text_normal_3.txt",
-		"text_normal_4.txt": testfilepath + "files/text_normal_4.txt",
-	}
+	archiver.acm.add_document("text_normal_1.txt", ["admin", "privlieged", "default", "guest"], testfilepath + "files/text_normal_1.txt",)
+	archiver.acm.add_document("text_normal_2.txt", ["admin", "privlieged", "default"], testfilepath + "files/text_normal_2.txt",)
+	archiver.acm.add_document("text_normal_3.txt", ["admin"], testfilepath + "files/text_normal_3.txt",)
+	archiver.acm.add_document("text_normal_4.txt", ["admin", "privlieged"], testfilepath + "files/text_normal_4.txt",)
 
 	# Oops, some of the data we entered into the archiver is wrong.
 	# Let's test a bunch of ACM functions:

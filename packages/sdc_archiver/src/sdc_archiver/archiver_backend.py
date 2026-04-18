@@ -16,7 +16,6 @@ class SDCArchiver:
     def __init__(self):
         self.acm = AccessControlMatrix()
         self.crypto = CryptoSDC()
-        self.document_filepaths = {}
         self.key_library = {}
 
     # Exports completed SDC
@@ -25,7 +24,8 @@ class SDCArchiver:
         try:
             # Hash password for 7z encryption
             hashed_password = hashlib.sha256(archive_password.encode()).hexdigest()
-            for fid, fpath in self.document_filepaths.items():
+            for fid, doc in self.acm.documents.items():
+                fpath = doc["path"]
                 # 32 bytes -> 256 bits
                 key = get_random_bytes(32)
                 self.key_library[fid] = key.hex()

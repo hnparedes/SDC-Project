@@ -153,8 +153,8 @@ class ArchiverGUI(tk.Tk):
 
         for item in self.doc_tree.get_children():
             self.doc_tree.delete(item)
-        for fid in self.backend.document_filepaths.keys():
-            levels = self.backend.acm.documents.get(fid, [])
+        for fid in self.backend.acm.documents.keys():
+            levels = self.backend.acm.documents[fid].get("access_levels", [])
             self.doc_tree.insert("", "end", values=(fid, ", ".join(levels)))
 
     # Addition methods
@@ -244,9 +244,7 @@ class ArchiverGUI(tk.Tk):
             selected_levels = [lb.get(i) for i in lb.curselection()]
             # Try adding the document to the ACM
             try:
-                self.backend.acm.add_document(filename, selected_levels)
-                # If successful, update the document treeview and record the file location
-                self.backend.document_filepaths[filename] = filepath
+                self.backend.acm.add_document(filename, selected_levels, filename)
                 self.doc_tree.insert(
                     "", "end", values=(filename, ", ".join(selected_levels))
                 )
@@ -339,7 +337,7 @@ class ArchiverGUI(tk.Tk):
             return
 
         fid = self.doc_tree.item(selected[0])["values"][0]
-        current_levels = self.backend.acm.documents.get(fid, [])
+        current_levels = self.backend.acm.documents[fid].get("access_levels", [])
 
         pop = tk.Toplevel(self)
         pop.title("Edit Document")
@@ -432,8 +430,6 @@ class ArchiverGUI(tk.Tk):
         # Remove from file list and access control
         try:
             self.backend.acm.delete_document(fid)
-            if fid in self.backend.document_filepaths:
-                del self.backend.document_filepaths[fid]
             # Remove from UI tree
             self.doc_tree.delete(selected[0])
         except Exception as e:
@@ -441,7 +437,7 @@ class ArchiverGUI(tk.Tk):
 
     # SDC export GUI function
     def export_sdc(self):
-        if not self.backend.document_filepaths:
+        if not self.backend.acm.documents:
             messagebox.showerror("Error", "Add at least one document.")
             return
 
