@@ -45,7 +45,22 @@ def test_viewer():
         viewer.extract_document("nonexistent", extractionoutputpath + "nonexistent")
 
     # Extracting a document that the user does not have permissions for should fail
-    assert not viewer.extract_document("text_normal_3.txt", extractionoutputpath + "text_normal_3.txt")
+    with pytest.raises(Exception):
+        viewer.extract_document("text_normal_3.txt", extractionoutputpath + "text_normal_3.txt")
+
+    # The error for nonexistent documents and documents with insufficient permissions should be identical
+    try:
+        # Get the error message for a document that doesn't exist
+        viewer.extract_document("nonexistent_1", extractionoutputpath + "nonexistent_1")
+        assert False
+    except Exception as e1:
+        try:
+            # Get the error message for a document without permission to access
+            viewer.acm.add_document("nonexistent_1", ["admin"])
+            viewer.extract_document("nonexistent_1", extractionoutputpath + "nonexistent_1")
+            assert False
+        except Exception as e2:
+            assert str(e1) == str(e2), "Error message for trying to access a nonexistent document and a document with insufficient permission to access are different"
 
     # Extracting a document that the user does have permissions for should succeed
     assert viewer.extract_document("text_normal_2.txt", extractionoutputpath + "text_normal_2.txt")

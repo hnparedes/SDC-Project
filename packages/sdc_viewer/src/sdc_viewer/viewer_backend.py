@@ -66,6 +66,13 @@ class SDCViewer:
 
     # Function to extract a select file
     def extract_document(self, file_id, dest_path):
+        # Check ACM permissions
+        if (
+            not self.acm.documents.get(file_id)
+            or self.current_user_level not in self.acm.documents[file_id]
+        ):
+            raise PermissionError(f"Access denied for file ID: {file_id}")
+        
         try:
             key = bytes.fromhex(self.key_library[file_id])
             enc_filepath = os.path.join(self.contents_dir, file_id)
