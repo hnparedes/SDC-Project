@@ -60,8 +60,8 @@ class SDCViewer:
     def get_accessible_files(self):
         return [
             fid
-            for fid, levels in self.acm.documents.items()
-            if self.current_user_level in levels
+            for fid, doc in self.acm.documents.items()
+            if self.current_user_level in doc["access_levels"]
         ]
 
     # Function to extract a select file
@@ -69,10 +69,10 @@ class SDCViewer:
         # Check ACM permissions
         if (
             not self.acm.documents.get(file_id)
-            or self.current_user_level not in self.acm.documents[file_id]
+            or self.current_user_level not in self.acm.documents[file_id]["access_levels"]
         ):
             raise PermissionError(f"Access denied for file ID: {file_id}")
-        
+
         try:
             key = bytes.fromhex(self.key_library[file_id])
             enc_filepath = os.path.join(self.contents_dir, file_id)

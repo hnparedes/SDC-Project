@@ -244,7 +244,7 @@ class ArchiverGUI(tk.Tk):
             selected_levels = [lb.get(i) for i in lb.curselection()]
             # Try adding the document to the ACM
             try:
-                self.backend.acm.add_document(filename, selected_levels, filename)
+                self.backend.acm.add_document(filename, selected_levels, filepath)
                 self.doc_tree.insert(
                     "", "end", values=(filename, ", ".join(selected_levels))
                 )
