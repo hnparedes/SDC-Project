@@ -46,9 +46,9 @@ class ArchiverGUI(tk.Tk):
         main_frame = tk.Frame(self, padx=10, pady=10)
         main_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Left side: Document list
+        # Right side: Document list
         doc_frame = tk.LabelFrame(main_frame, text="Documents")
-        doc_frame.place(relx=0, rely=0, relwidth=0.48, relheight=0.85)
+        doc_frame.place(relx=0.52, rely=0, relwidth=0.48, relheight=0.85)
 
         doc_btn_frame = tk.Frame(doc_frame)
         doc_btn_frame.pack(side=tk.BOTTOM, pady=5)
@@ -73,9 +73,9 @@ class ArchiverGUI(tk.Tk):
         self.doc_tree.heading("Access Level", text="Access Level")
         self.doc_tree.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=5, pady=5)
 
-        # Top right: Access control levels
-        al_frame = tk.LabelFrame(main_frame, text="Access Levels")
-        al_frame.place(relx=0.52, rely=0, relwidth=0.48, relheight=0.4)
+        # Top left: Access control levels
+        al_frame = tk.LabelFrame(main_frame, text="Access Levels (Start Here)")
+        al_frame.place(relx=0, rely=0, relwidth=0.48, relheight=0.4)
 
         al_btn_frame = tk.Frame(al_frame)
         al_btn_frame.pack(side=tk.BOTTOM, pady=5)
@@ -96,9 +96,9 @@ class ArchiverGUI(tk.Tk):
         self.al_tree.heading("Name", text="Name")
         self.al_tree.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=5, pady=5)
 
-        # Bottom right: User list
+        # Bottom left: User list
         user_frame = tk.LabelFrame(main_frame, text="Users")
-        user_frame.place(relx=0.52, rely=0.45, relwidth=0.48, relheight=0.4)
+        user_frame.place(relx=0, rely=0.45, relwidth=0.48, relheight=0.4)
 
         user_btn_frame = tk.Frame(user_frame)
         user_btn_frame.pack(side=tk.BOTTOM, pady=5)
