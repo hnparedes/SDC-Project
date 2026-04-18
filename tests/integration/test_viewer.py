@@ -45,7 +45,8 @@ def test_viewer():
         viewer.extract_document("nonexistent", extractionoutputpath + "nonexistent")
 
     # Extracting a document that the user does not have permissions for should fail
-    assert not viewer.extract_document("text_normal_3.txt", extractionoutputpath + "text_normal_3.txt")
+    with pytest.raises(Exception):
+        viewer.extract_document("text_normal_3.txt", extractionoutputpath + "text_normal_3.txt")
 
     # Extracting a document that the user does have permissions for should succeed
     assert viewer.extract_document("text_normal_2.txt", extractionoutputpath + "text_normal_2.txt")
