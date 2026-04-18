@@ -249,12 +249,13 @@ class AccessControlMatrix:
         return True
 
     # JSON formatting helper
-    def to_json(self):
-        return {
-            "users": self.users,
-            "files": self.documents,
-            "access_levels": self.access_levels,
+    def to_json(self, strip_paths = False):
+        format = {
+            "users": self.users.copy(),
+            "files": self.documents.copy(),
+            "access_levels": self.access_levels.copy(),
         }
+        return format
 
     # JSON loader
     def load_json(self, data):
