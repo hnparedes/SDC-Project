@@ -162,9 +162,9 @@ class ArchiverGUI(tk.Tk):
     def add_access_level(self):
         pop = tk.Toplevel(self)
         pop.title("Edit/Add Access Level")
+        pop.geometry("250x110")
         pop.transient(self)
         pop.grab_set()
-        pop.geometry("250x110")
         pop.resizable(False, False)
         tk.Label(pop, text="Name:").pack(pady=5)
         entry = tk.Entry(pop)
@@ -192,9 +192,9 @@ class ArchiverGUI(tk.Tk):
             return
         pop = tk.Toplevel(self)
         pop.title("Edit/Add User")
+        pop.geometry("250x200")
         pop.transient(self)
         pop.grab_set()
-        pop.geometry("250x200")
         pop.resizable(False, False)
 
         tk.Label(pop, text="Username:").pack()
