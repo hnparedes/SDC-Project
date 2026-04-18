@@ -161,7 +161,7 @@ class ArchiverGUI(tk.Tk):
     def add_access_level(self):
         pop = tk.Toplevel(self)
         pop.title("Edit/Add Access Level")
-        pop.geometry("250x100")
+        pop.geometry("250x110")
         tk.Label(pop, text="Name:").pack(pady=5)
         entry = tk.Entry(pop)
         entry.pack()
@@ -207,6 +207,12 @@ class ArchiverGUI(tk.Tk):
             usr = u_entry.get().strip()
             pwd = p_entry.get()
             lvl = cb.get()
+            
+            # Check for empty passwords
+            if not pwd:
+                messagebox.showerror("Error", "Password cannot be empty.")
+                return
+            
             # Try adding the user to the ACM
             try:
                 self.backend.acm.add_user(usr, pwd, lvl)
