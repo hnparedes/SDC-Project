@@ -17,6 +17,7 @@ class ArchiverGUI(tk.Tk):
         super().__init__()
         self.title("SDC Archiver (Main Window)")
         self.geometry("800x550")
+        self.resizable(False, False)
         self.backend = SDCArchiver()
 
         self.create_menu()
@@ -161,7 +162,10 @@ class ArchiverGUI(tk.Tk):
     def add_access_level(self):
         pop = tk.Toplevel(self)
         pop.title("Edit/Add Access Level")
-        pop.geometry("250x100")
+        pop.geometry("250x110")
+        pop.transient(self)
+        pop.grab_set()
+        pop.resizable(False, False)
         tk.Label(pop, text="Name:").pack(pady=5)
         entry = tk.Entry(pop)
         entry.pack()
@@ -189,6 +193,9 @@ class ArchiverGUI(tk.Tk):
         pop = tk.Toplevel(self)
         pop.title("Edit/Add User")
         pop.geometry("250x200")
+        pop.transient(self)
+        pop.grab_set()
+        pop.resizable(False, False)
 
         tk.Label(pop, text="Username:").pack()
         u_entry = tk.Entry(pop)
@@ -231,6 +238,9 @@ class ArchiverGUI(tk.Tk):
         pop = tk.Toplevel(self)
         pop.title("Edit/Add Document")
         pop.geometry("300x250")
+        pop.transient(self)
+        pop.grab_set()
+        pop.resizable(False, False)
 
         tk.Label(pop, text=f"Path: {filepath}", wraplength=280).pack(pady=5)
         tk.Label(pop, text="Access Levels (Select multiple):").pack()
@@ -268,6 +278,9 @@ class ArchiverGUI(tk.Tk):
         pop = tk.Toplevel(self)
         pop.title("Edit Access Level")
         pop.geometry("250x100")
+        pop.transient(self)
+        pop.grab_set()
+        pop.resizable(False, False)
         tk.Label(pop, text="Name:").pack(pady=5)
 
         entry = tk.Entry(pop)
@@ -301,6 +314,9 @@ class ArchiverGUI(tk.Tk):
         pop = tk.Toplevel(self)
         pop.title("Edit User")
         pop.geometry("250x200")
+        pop.transient(self)
+        pop.grab_set()
+        pop.resizable(False, False)
 
         tk.Label(pop, text="Username:").pack()
         u_entry = tk.Entry(pop)
@@ -344,6 +360,9 @@ class ArchiverGUI(tk.Tk):
         pop = tk.Toplevel(self)
         pop.title("Edit Document")
         pop.geometry("300x250")
+        pop.transient(self)
+        pop.grab_set()
+        pop.resizable(False, False)
 
         tk.Label(pop, text=f"File: {fid}", wraplength=280).pack(pady=5)
         tk.Label(pop, text="Access Levels (Select multiple):").pack()
@@ -462,6 +481,9 @@ class ArchiverGUI(tk.Tk):
         pop = tk.Toplevel(self)
         pop.title("Export SDC")
         pop.geometry("350x150")
+        pop.transient(self)
+        pop.grab_set()
+        pop.resizable(False, False)
 
         tk.Label(pop, text="Archive Key (Password):").pack(pady=5)
         pw_entry = tk.Entry(pop, show="*")
