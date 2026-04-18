@@ -194,7 +194,6 @@ class ArchiverGUI(tk.Tk):
         u_entry = tk.Entry(pop)
         u_entry.pack()
 
-        # TODO: Fails to deal with empty password entry, oops. It'll just not stop it from happening but also won't allow it?
         tk.Label(pop, text="Password:").pack()
         p_entry = tk.Entry(pop, show="*")
         p_entry.pack()
