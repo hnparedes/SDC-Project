@@ -396,7 +396,7 @@ class ArchiverGUI(tk.Tk):
         if not selected:
             return
 
-        lvl_to_delete = self.al_tree.item(selected[0])["values"][0]
+        lvl_to_delete = str(self.al_tree.item(selected[0])["values"][0])
 
         # Identify any users that are currently using this access level
         affected_users = self.backend.acm.get_users_with_access_level(lvl_to_delete)
