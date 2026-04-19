@@ -56,6 +56,8 @@ class SDCViewer:
             if user and user["password_hash"] == self.acm.hash_password(password):
                 self.current_user_level = user["access_level"]
                 return True
+            else:
+                raise Exception("Login failed")
         except Exception as e:
             #cannot access username or password is incorrect
             raise Exception(f"Login failed: {e}")
