@@ -249,3 +249,26 @@ def test_delete_document():
     # Deleting a nonexistent document should fail
     with pytest.raises(Exception, match=r".*not exist.*"):
         acm.delete_document("nonexistent")
+
+def test_to_json():
+    acm = AccessControlMatrix()
+    acm.add_access_level("test")
+    acm.add_document("document", ["test"], "path")
+
+    # Export the format without stripping file paths
+    format = acm.to_json()
+
+    # Path should not be stripped from the format dict
+    assert "path" in format["files"]["document"]
+
+    # Path should not be stripped from the ACM
+    assert "path" in acm.documents["document"]
+
+    # Export the format and strip file paths
+    format = acm.to_json(True)
+
+    # Path should be stripped from the format dict
+    assert "path" not in format["files"]["document"]
+
+    # Path should not be stripped from the ACM
+    assert "path" in acm.documents["document"]
