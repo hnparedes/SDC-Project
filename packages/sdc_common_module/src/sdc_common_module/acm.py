@@ -1,4 +1,5 @@
 import hashlib
+from re import L
 
 
 # Common backend class for ACM
@@ -255,6 +256,11 @@ class AccessControlMatrix:
             "files": self.documents.copy(),
             "access_levels": self.access_levels.copy(),
         }
+        if strip_paths:
+            for fid in format["files"]:
+                # Copy to ensure we aren't destroying the archiver's copy of the ACM
+                format["files"][fid] = format["files"][fid].copy()
+                del format["files"][fid]["path"]
         return format
 
     # JSON loader

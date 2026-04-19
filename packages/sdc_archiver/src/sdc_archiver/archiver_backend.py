@@ -44,7 +44,7 @@ class SDCArchiver:
                     f.write(encrypted_data)
 
             with open(os.path.join(temp_dir, "acm.json"), "w") as f:
-                json.dump(self.acm.to_json(), f)
+                json.dump(self.acm.to_json(True), f)
 
             with open(os.path.join(temp_dir, "key_lib.json"), "w") as f:
                 json.dump(self.key_library, f)
