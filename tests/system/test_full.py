@@ -76,7 +76,7 @@ def test_full():
 
 	archiver.export_archive(archivepath, "sonormal")
 
-	# Export again to make sure file paths are not stripped from the archiver's copy of the ACM
+	# The user might export the ACM multiple times in one session, and this shouldn't cause problems
 	archiver.export_archive(archivepath, "sonormal")
 
 	# Now that the archive is done, let's test the viewer.
