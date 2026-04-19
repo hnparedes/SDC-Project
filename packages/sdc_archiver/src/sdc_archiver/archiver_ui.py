@@ -139,7 +139,7 @@ class ArchiverGUI(tk.Tk):
             bottom_frame, text="Export SDC", width=12, command=self.export_sdc
         ).pack(side=tk.RIGHT, padx=5)
         # TODO: As mentioned before, this button does nothing.
-        tk.Button(bottom_frame, text="Save", width=8).pack(side=tk.RIGHT, padx=5)
+        tk.Button(bottom_frame, text="Save", width=8, command=self.save_draft).pack(side=tk.RIGHT, padx=5)
         tk.Button(bottom_frame, text="Close", width=8, command=self.destroy).pack(
             side=tk.RIGHT, padx=5
         )
@@ -434,6 +434,23 @@ class ArchiverGUI(tk.Tk):
             self.doc_tree.delete(selected[0])
         except Exception as e:
             messagebox.showerror("Error", str(e))
+
+    def save_draft(self):
+        filepath = filedialog.asksaveasfilename(
+            defaultextension=".json", filetypes=[("JSON file", "*.json")]
+        )
+        if not filepath:
+            return
+
+        try:
+            self.status_lbl.config(text="Saving...")
+            self.backend.save_draft(filepath)
+            messagebox.showinfo("Success", f"Successfully saved ACM to {str(filepath)}")
+            self.status_lbl.config(text="Saving Complete.")
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+            self.status_lbl.config(text="Saving Failed.")
+
 
     # SDC export GUI function
     def export_sdc(self):
