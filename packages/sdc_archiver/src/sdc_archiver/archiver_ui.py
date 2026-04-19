@@ -171,7 +171,7 @@ class ArchiverGUI(tk.Tk):
         entry.pack()
 
         def apply():
-            lvl = entry.get().strip()
+            lvl = str(entry.get().strip())
 
             # Prevent creation of 'Unassigned'
 
@@ -211,9 +211,9 @@ class ArchiverGUI(tk.Tk):
         cb.pack()
 
         def apply():
-            usr = u_entry.get().strip()
-            pwd = p_entry.get()
-            lvl = cb.get()
+            usr = str(u_entry.get().strip())
+            pwd = str(p_entry.get())
+            lvl = str(cb.get())
             # Try adding the user to the ACM
             try:
                 self.backend.acm.add_user(usr, pwd, lvl)
@@ -273,7 +273,7 @@ class ArchiverGUI(tk.Tk):
             messagebox.showwarning("Warning", "Select an Access Level to edit.")
             return
 
-        old_lvl = self.al_tree.item(selected[0])["values"][0]
+        old_lvl = str(self.al_tree.item(selected[0])["values"][0])
 
         pop = tk.Toplevel(self)
         pop.title("Edit Access Level")
@@ -288,7 +288,7 @@ class ArchiverGUI(tk.Tk):
         entry.pack()
 
         def apply():
-            new_lvl = entry.get().strip()
+            new_lvl = str(entry.get().strip())
 
             # Try renaming the access level
             try:
@@ -308,8 +308,8 @@ class ArchiverGUI(tk.Tk):
             messagebox.showwarning("Warning", "Select a User to edit.")
             return
 
-        old_uid = self.user_tree.item(selected[0])["values"][0]
-        old_lvl = self.user_tree.item(selected[0])["values"][1]
+        old_uid = str(self.user_tree.item(selected[0])["values"][0])
+        old_lvl = str(self.user_tree.item(selected[0])["values"][1])
 
         pop = tk.Toplevel(self)
         pop.title("Edit User")
@@ -333,9 +333,9 @@ class ArchiverGUI(tk.Tk):
         cb.pack()
 
         def apply():
-            new_uid = u_entry.get().strip()
-            new_pwd = p_entry.get()
-            new_lvl = cb.get()
+            new_uid = str(u_entry.get().strip())
+            new_pwd = str(p_entry.get())
+            new_lvl = str(cb.get())
 
             # Try updating the user information
             try:
@@ -396,7 +396,7 @@ class ArchiverGUI(tk.Tk):
         if not selected:
             return
 
-        lvl_to_delete = self.al_tree.item(selected[0])["values"][0]
+        lvl_to_delete = str(self.al_tree.item(selected[0])["values"][0])
 
         # Identify any users that are currently using this access level
         affected_users = self.backend.acm.get_users_with_access_level(lvl_to_delete)
@@ -431,7 +431,7 @@ class ArchiverGUI(tk.Tk):
         if not selected:
             return
 
-        uid = self.user_tree.item(selected[0])["values"][0]
+        uid = str(self.user_tree.item(selected[0])["values"][0])
 
         # Remove from user list and access control
         try:
