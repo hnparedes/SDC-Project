@@ -21,7 +21,7 @@ class SDCArchiver:
     # Saves draft ACM
     def save_draft(self, location):
         with open(location, "w") as f:
-            json.dump(self.acm.to_json(True), f)
+            json.dump(self.acm.to_json(), f)
 
     # Loads draft ACM
     def load_draft(self, location):
