@@ -25,10 +25,12 @@ def test_viewer():
     assert viewer.open_archive(testarchivelocation, "sonormal")
 
     # Logging in as a nonexistent user should fail
-    assert not viewer.login("nonexistent", "opensesame")
+    with pytest.raises(Exception):
+        viewer.login("nonexistent", "opensesame")
 
     # Logging in with the incorrect password should fail
-    assert not viewer.login("bob", "wrongpassword")
+    with pytest.raises(Exception):
+        viewer.login("bob", "wrongpassword")
 
     # Logging in with the correct password should succeed
     assert viewer.login("bob", "opensesame")
