@@ -4,11 +4,7 @@ from tkinter import filedialog, messagebox, ttk
 
 from sdc_archiver.archiver_backend import SDCArchiver
 
-# GUI classes (TODO: Windows are rescaleable, leading to buttons being hidden. Set bounds to prevent this.)
-# Author's notes: Some functions present here might be worth moving back to the backend classes?
-# In addition, the archiver might be better with the documents on the right side and
-# moving the ACM and users to the left. To be discussed and implemented later as needed.
-
+# GUI classes
 
 # SDC Archiver GUI class
 class ArchiverGUI(tk.Tk):
@@ -138,14 +134,10 @@ class ArchiverGUI(tk.Tk):
         self.status_lbl.pack(side=tk.LEFT)
 
         # Bottom right general buttons
-        tk.Button(
-            bottom_frame, text="Export SDC", width=12, command=self.export_sdc
-        ).pack(side=tk.RIGHT, padx=5)
-        # TODO: As mentioned before, this button does nothing.
+        tk.Button(bottom_frame, text="Export SDC", width=12, command=self.export_sdc).pack(side=tk.RIGHT, padx=5)
         tk.Button(bottom_frame, text="Save", width=8, command=self.save_draft).pack(side=tk.RIGHT, padx=5)
-        tk.Button(bottom_frame, text="Close", width=8, command=self.destroy).pack(
-            side=tk.RIGHT, padx=5
-        )
+        tk.Button(bottom_frame, text="Load", width=8, command=self.load_draft).pack(side=tk.RIGHT, padx=5)
+        tk.Button(bottom_frame, text="Close", width=8, command=self.destroy).pack(side=tk.RIGHT, padx=5)
 
     def refresh_sub_trees(self):
         # Helper to redraw users and documents if an Access Level is renamed.
