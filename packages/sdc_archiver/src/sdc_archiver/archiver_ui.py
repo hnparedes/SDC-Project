@@ -27,7 +27,8 @@ class ArchiverGUI(tk.Tk):
         menubar = tk.Menu(self)
         file_menu = tk.Menu(menubar, tearoff=0)
         file_menu.add_command(label="New Draft Archive")
-        file_menu.add_command(label="Save Draft")
+        file_menu.add_command(label="Load Draft", command=self.load_draft)
+        file_menu.add_command(label="Save Draft", command=self.save_draft)
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self.destroy)
         menubar.add_cascade(label="File", menu=file_menu)
@@ -156,6 +157,12 @@ class ArchiverGUI(tk.Tk):
         for fid in self.backend.acm.documents.keys():
             levels = self.backend.acm.documents[fid].get("access_levels", [])
             self.doc_tree.insert("", "end", values=(fid, ", ".join(levels)))
+
+    def refresh_access_level_tree(self):
+        for item in self.al_tree.get_children():
+            self.al_tree.delete(item)
+        for lvl in self.backend.acm.access_levels:
+            self.al_tree.insert("", "end", values=(lvl, lvl, "***"))
 
     # Addition methods
     def add_access_level(self):
@@ -451,6 +458,22 @@ class ArchiverGUI(tk.Tk):
             messagebox.showerror("Error", str(e))
             self.status_lbl.config(text="Saving Failed.")
 
+    def load_draft(self):
+        filepath = filedialog.askopenfilename(
+            defaultextension=".json", filetypes=[("JSON file", "*.json")]
+        )
+        if not filepath:
+            return
+
+        try:
+            self.status_lbl.config(text="Loading...")
+            self.backend.load_draft(filepath)
+            self.status_lbl.config(text="Loading Complete.")
+            self.refresh_access_level_tree()
+            self.refresh_sub_trees()
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+            self.status_lbl.config(text="Loading Failed.")
 
     # SDC export GUI function
     def export_sdc(self):

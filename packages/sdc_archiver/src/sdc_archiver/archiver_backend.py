@@ -22,12 +22,11 @@ class SDCArchiver:
     def save_draft(self, location):
         with open(location, "w") as f:
             json.dump(self.acm.to_json(True), f)
-        return
 
     # Loads draft ACM
     def load_draft(self, location):
-
-        return
+        with open(location, "r") as f:
+            self.acm.load_json(json.load(f))
 
     # Exports completed SDC
     def export_archive(self, archive_name, archive_password):
