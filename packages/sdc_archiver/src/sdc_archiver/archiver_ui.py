@@ -22,6 +22,8 @@ class ArchiverGUI(tk.Tk):
         self.create_menu()
         self.create_widgets()
 
+        self.unsaved_changes = False
+
     # Create menu items
     def create_menu(self):
         menubar = tk.Menu(self)
@@ -184,6 +186,7 @@ class ArchiverGUI(tk.Tk):
                 # If it succeeds, update the access level treeview
                 self.al_tree.insert("", "end", values=(lvl,))
                 pop.destroy()
+                self.mark_unsaved_changes()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
 
@@ -220,6 +223,7 @@ class ArchiverGUI(tk.Tk):
                 # If successful, update the user treeview
                 self.user_tree.insert("", "end", values=(usr, lvl, "***"))
                 pop.destroy()
+                self.mark_unsaved_changes()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
 
@@ -256,6 +260,7 @@ class ArchiverGUI(tk.Tk):
                     "", "end", values=(filename, ", ".join(selected_levels))
                 )
                 pop.destroy()
+                self.mark_unsaved_changes()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
 
@@ -289,6 +294,7 @@ class ArchiverGUI(tk.Tk):
                 self.al_tree.item(selected[0], values=(new_lvl,))
                 self.refresh_sub_trees()
                 pop.destroy()
+                self.mark_unsaved_changes()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
 
@@ -332,6 +338,7 @@ class ArchiverGUI(tk.Tk):
                 # If successful, update the user treeview
                 self.user_tree.item(selected[0], values=(new_uid, new_lvl, "***"))
                 pop.destroy()
+                self.mark_unsaved_changes()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
 
@@ -371,6 +378,7 @@ class ArchiverGUI(tk.Tk):
                     selected[0], values=(fid, ", ".join(selected_levels))
                 )
                 pop.destroy()
+                self.mark_unsaved_changes()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
 
@@ -409,6 +417,7 @@ class ArchiverGUI(tk.Tk):
             # If successful, update the relevant treeviews
             self.al_tree.delete(selected[0])
             self.refresh_sub_trees()
+            self.mark_unsaved_changes()
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
@@ -424,6 +433,7 @@ class ArchiverGUI(tk.Tk):
             self.backend.acm.delete_user(uid)
             # Remove from UI tree
             self.user_tree.delete(selected[0])
+            self.mark_unsaved_changes()
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
@@ -439,6 +449,7 @@ class ArchiverGUI(tk.Tk):
             self.backend.acm.delete_document(fid)
             # Remove from UI tree
             self.doc_tree.delete(selected[0])
+            self.mark_unsaved_changes()
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
@@ -454,6 +465,7 @@ class ArchiverGUI(tk.Tk):
             self.backend.save_draft(filepath)
             messagebox.showinfo("Success", f"Successfully saved ACM to {str(filepath)}")
             self.status_lbl.config(text="Saving Complete.")
+            self.clear_unsaved_changes()
         except Exception as e:
             messagebox.showerror("Error", str(e))
             self.status_lbl.config(text="Saving Failed.")
@@ -471,6 +483,7 @@ class ArchiverGUI(tk.Tk):
             self.status_lbl.config(text="Loading Complete.")
             self.refresh_access_level_tree()
             self.refresh_sub_trees()
+            self.clear_unsaved_changes()
         except Exception as e:
             messagebox.showerror("Error", str(e))
             self.status_lbl.config(text="Loading Failed.")
@@ -523,6 +536,34 @@ class ArchiverGUI(tk.Tk):
             pop.destroy()
 
         tk.Button(pop, text="Export", command=apply).pack(pady=15)
+
+    def clear_unsaved_changes(self):
+        self.unsaved_changes = False
+        self.title("SDC Archiver (Main Window)")
+
+    def mark_unsaved_changes(self):
+        self.unsaved_changes = True
+        self.title("SDC Archiver (Main Window) (Unsaved Changes)")
+
+    # Override the base destroy function
+    def destroy(self):
+        close = True
+        if self.unsaved_changes:
+            close = self.save_warning()
+
+        if close:
+            super().destroy()
+            return
+
+    def save_warning(self):
+        choice = tk.messagebox.askyesnocancel(title="Exit", message="There are unsaved changes. Do you want to save a draft archive before exiting?\n\n(Note: exported archives cannot be edited, you should save a draft archive if you want to edit it in the future)",)
+        if choice is None:
+            return False
+        elif choice:
+            self.save_draft()
+            return True
+        else:
+            return True
 
 
 if __name__ == "__main__":
