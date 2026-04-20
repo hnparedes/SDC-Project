@@ -1,4 +1,5 @@
 import hashlib
+from re import L
 
 
 # Common backend class for ACM
@@ -54,8 +55,9 @@ class AccessControlMatrix:
         return True
 
     # Function to add document with a unique name, and the access levels allowed to view it
-    def add_document(self, doc_id, access_levels):
+    def add_document(self, doc_id, access_levels, path = ""):
         # Is the document name and access level list nonempty?
+        # (Path is allowed to be empty)
         if not doc_id or not access_levels:
             raise Exception(
                 "One or more fields are empty. Please make sure to fill out all fields."
@@ -74,7 +76,11 @@ class AccessControlMatrix:
             if a.lower() == "unassigned":
                 raise Exception("'Unassigned' is a reserved system level.")
 
-        self.documents[doc_id] = access_levels
+        self.documents[doc_id] = {
+            "path": path,
+            "access_levels": access_levels
+        }
+
         return True
 
     def rename_access_level(self, old_lvl, new_lvl):
@@ -113,9 +119,9 @@ class AccessControlMatrix:
                 udata["access_level"] = new_lvl
 
         # Cascade change to files
-        for fid, levels in self.documents.items():
-            if old_lvl in levels:
-                levels[levels.index(old_lvl)] = new_lvl
+        for fid, document in self.documents.items():
+            if old_lvl in document["access_levels"]:
+                document["access_levels"][document["access_levels"].index(old_lvl)] = new_lvl
 
         return True
 
@@ -162,7 +168,7 @@ class AccessControlMatrix:
 
         # TODO: Reject the document if access_levels contains the error access level
 
-        self.documents[doc_id] = access_levels
+        self.documents[doc_id]["access_levels"] = access_levels
         return True
 
     def get_users_with_access_level(self, lvl):
@@ -198,13 +204,13 @@ class AccessControlMatrix:
             self.access_levels.remove(lvl_to_delete)
 
         # Remove this access level from any documents through iteration
-        for fid, levels in self.documents.items():
-            if lvl_to_delete in levels:
-                levels.remove(lvl_to_delete)
+        for fid, doc in self.documents.items():
+            if lvl_to_delete in doc["access_levels"]:
+                doc["access_levels"].remove(lvl_to_delete)
 
             # If no access level remain, assign "Unassigned"
-            if not levels:
-                self.documents[fid] = ["Unassigned"]
+            if not doc["access_levels"]:
+                doc["access_levels"] = ["Unassigned"]
 
         # Set affected users to "Unassigned"
         for uid in affected_users:
@@ -244,12 +250,18 @@ class AccessControlMatrix:
         return True
 
     # JSON formatting helper
-    def to_json(self):
-        return {
-            "users": self.users,
-            "files": self.documents,
-            "access_levels": self.access_levels,
+    def to_json(self, strip_paths = False):
+        format = {
+            "users": self.users.copy(),
+            "files": self.documents.copy(),
+            "access_levels": self.access_levels.copy(),
         }
+        if strip_paths:
+            for fid in format["files"]:
+                # Copy to ensure we aren't destroying the archiver's copy of the ACM
+                format["files"][fid] = format["files"][fid].copy()
+                del format["files"][fid]["path"]
+        return format
 
     # JSON loader
     def load_json(self, data):

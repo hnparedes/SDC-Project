@@ -66,8 +66,8 @@ def test_access_level_rename_propagation():
 
     # Users and documents should have their access level updated if it is renamed
     assert acm.users["user"]["access_level"] == "test_renamed"
-    assert "test_renamed" in acm.documents["document"]
-    assert "test" not in acm.documents["document"]
+    assert "test_renamed" in acm.documents["document"]["access_levels"]
+    assert "test" not in acm.documents["document"]["access_levels"]
 
 
 def test_delete_access_level():
@@ -104,9 +104,9 @@ def test_access_level_delete_propagation():
     # Users should have their access level changed to "Unassigned" if it is deleted
     assert acm.users["user"]["access_level"] == "Unassigned"
     # Documents should have access levels removed from their access level list if they are deleted
-    assert "test" not in acm.documents["document"]
+    assert "test" not in acm.documents["document"]["access_levels"]
     # If a document's only access level is deleted, its access level list should be set to Unassigned
-    assert "Unassigned" in acm.documents["document2"]
+    assert "Unassigned" in acm.documents["document2"]["access_levels"]
 
 
 def test_add_user():
@@ -225,7 +225,9 @@ def test_set_document_perms():
     # Changing the permissions of an empty document should fail
     with pytest.raises(Exception, match=r".*select.*"):
         acm.set_document_perms("", ["test_a"])
-        # Changing the permissions of a nonexistent document should fail
+
+    # Changing the permissions of a nonexistent document should fail
+    with pytest.raises(Exception, match=r".*select.*"):
         acm.set_document_perms("nonexistent", ["test_a"])
 
 
@@ -247,3 +249,26 @@ def test_delete_document():
     # Deleting a nonexistent document should fail
     with pytest.raises(Exception, match=r".*not exist.*"):
         acm.delete_document("nonexistent")
+
+def test_to_json():
+    acm = AccessControlMatrix()
+    acm.add_access_level("test")
+    acm.add_document("document", ["test"], "path")
+
+    # Export the format without stripping file paths
+    format = acm.to_json()
+
+    # Path should not be stripped from the format dict
+    assert "path" in format["files"]["document"]
+
+    # Path should not be stripped from the ACM
+    assert "path" in acm.documents["document"]
+
+    # Export the format and strip file paths
+    format = acm.to_json(True)
+
+    # Path should be stripped from the format dict
+    assert "path" not in format["files"]["document"]
+
+    # Path should not be stripped from the ACM
+    assert "path" in acm.documents["document"]
