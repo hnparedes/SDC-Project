@@ -6,7 +6,7 @@ from sdc_archiver.archiver_backend import SDCArchiver
 from sdc_viewer.viewer_backend import SDCViewer
 
 testfilepath = "./tests/testfiles/"
-testoutputpath = "./.test-output/"
+test_output_path = "./.test-output/"
 
 # Simulates a full session of use of the SDC Suite, using all features of both programs.
 # This test only attempts valid inputs. No errors should occur while this test runs.
@@ -53,48 +53,65 @@ def test_full():
 	# We don't need to change his password, though
 	archiver.acm.update_user("bpb", "bob", "", "privileged")
 
-	# Turns out Charlie prefers going by his nickname, let's update his username
-	# He also forgot his password, and asked to change it to something easier-to-remember
-	archiver.acm.update_user("charles", "charlie", "password", "default")
-
-	# Delilah left the project, so let's remove her from the ACM
-	archiver.acm.delete_user("delilah")
-
-	# Alice got promoted after Delilah left, so she's taking over the admin role
-	archiver.acm.update_user("alice", "alice", "", "admin")
-
-	# Our legal team found out text_normal_4.txt has copyrighted content, so it must be removed
-	archiver.acm.delete_document("text_normal_4.txt")
-
 	# After removing the guest access level, text_normal_3.txt is unassigned. Let's fix that
 	archiver.acm.set_document_perms("text_normal_3.txt", ["default"])
 
 	# We're done updating the ACM, so let's export the archive
-	archiveoutputpath =	testoutputpath + "test_full" + time.strftime("%Y%m%d-%H%M%S") + "/"
-	archivepath = archiveoutputpath + "normalsdc.7z"
-	os.makedirs(archiveoutputpath, exist_ok=True)
+	archive_output_path = test_output_path + "test_full" + time.strftime("%Y%m%d-%H%M%S") + "/"
+	os.makedirs(archive_output_path, exist_ok=True)
 
-	archiver.export_archive(archivepath, "sonormal")
+	archive_path = archive_output_path + "normalsdc.7z"
+	archiver.export_archive(archive_path, "sonormal")
+
+	# Now let's abuse saving, loading, and exporting a bit and make sure nothing breaks.
 
 	# The user might export the ACM multiple times in one session, and this shouldn't cause problems
-	archiver.export_archive(archivepath, "sonormal")
+	archiver.export_archive(archive_path, "sonormal")
+
+	# Let's save a draft archive too
+	draft_path = archive_output_path + "normalacm.json"
+	archiver.save_draft(draft_path)
+
+	# Open the draft in a new instance of the archiver, because we forgot some things
+	archiver2 = SDCArchiver()
+	archiver2.load_draft(draft_path)
+
+	# Turns out Charlie prefers going by his nickname, let's update his username
+	# He also forgot his password, and asked to change it to something easier-to-remember
+	archiver2.acm.update_user("charles", "charlie", "password", "default")
+
+	# Delilah left the project, so let's remove her from the ACM
+	archiver2.acm.delete_user("delilah")
+
+	# Alice got promoted after Delilah left, so she's taking over the admin role
+	archiver2.acm.update_user("alice", "alice", "", "admin")
+
+	# Our legal team found out text_normal_4.txt has copyrighted content, so it must be removed
+	archiver2.acm.delete_document("text_normal_4.txt")
+
+	# Alright, now let's save the draft and export the archive again
+	archiver2.export_archive(archive_path, "sonormal")
+	archiver2.save_draft(draft_path)
+
+	# The user might export the ACM multiple times in one session, and this shouldn't cause problems
+	archiver.export_archive(archive_path, "sonormal")
 
 	# Now that the archive is done, let's test the viewer.
 	viewer = SDCViewer()
 
 	# Open the archive
-	viewer.open_archive(archivepath, "sonormal")
+	viewer.open_archive(archive_path, "sonormal")
 
 	# Bob is logging in
 	viewer.login("bob", "opensesame")
 
 	# Bob extracts text_normal_2.txt
-	viewer.extract_document("text_normal_2.txt", archiveoutputpath + "text_normal_2.txt")
+	viewer.extract_document("text_normal_2.txt", archive_output_path + "text_normal_2.txt")
 
 	# Bob closes the viewer
 	viewer.close()
 
 	# Bob confirms that the document was extracted properly by hastily reading the first line
-	assert "Lorem ipsum dolor sit amet." in open(archiveoutputpath + "text_normal_2.txt").read()
+	assert "Lorem ipsum dolor sit amet." in open(archive_output_path + "text_normal_2.txt").read()
 
 	# Godspeed, Bob.
