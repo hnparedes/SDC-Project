@@ -93,6 +93,9 @@ def test_full():
 	archiver2.export_archive(archive_path, "sonormal")
 	archiver2.save_draft(draft_path)
 
+	# The user might export the ACM multiple times in one session, and this shouldn't cause problems
+	archiver.export_archive(archivepath, "sonormal")
+
 	# Now that the archive is done, let's test the viewer.
 	viewer = SDCViewer()
 

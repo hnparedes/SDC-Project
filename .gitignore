@@ -15,3 +15,6 @@ data/
 
 # Test outputs
 .test-output/
+
+# Secrets
+ackey.py

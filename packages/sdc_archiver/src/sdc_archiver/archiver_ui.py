@@ -13,6 +13,7 @@ class ArchiverGUI(tk.Tk):
         super().__init__()
         self.title("SDC Archiver (Main Window)")
         self.geometry("800x550")
+        self.resizable(False, False)
         self.backend = SDCArchiver()
 
         self.create_menu()
@@ -162,13 +163,16 @@ class ArchiverGUI(tk.Tk):
     def add_access_level(self):
         pop = tk.Toplevel(self)
         pop.title("Edit/Add Access Level")
-        pop.geometry("250x100")
+        pop.geometry("250x110")
+        pop.transient(self)
+        pop.grab_set()
+        pop.resizable(False, False)
         tk.Label(pop, text="Name:").pack(pady=5)
         entry = tk.Entry(pop)
         entry.pack()
 
         def apply():
-            lvl = entry.get().strip()
+            lvl = str(entry.get().strip())
 
             # Prevent creation of 'Unassigned'
 
@@ -191,6 +195,9 @@ class ArchiverGUI(tk.Tk):
         pop = tk.Toplevel(self)
         pop.title("Edit/Add User")
         pop.geometry("250x200")
+        pop.transient(self)
+        pop.grab_set()
+        pop.resizable(False, False)
 
         tk.Label(pop, text="Username:").pack()
         u_entry = tk.Entry(pop)
@@ -206,9 +213,9 @@ class ArchiverGUI(tk.Tk):
         cb.pack()
 
         def apply():
-            usr = u_entry.get().strip()
-            pwd = p_entry.get()
-            lvl = cb.get()
+            usr = str(u_entry.get().strip())
+            pwd = str(p_entry.get())
+            lvl = str(cb.get())
             # Try adding the user to the ACM
             try:
                 self.backend.acm.add_user(usr, pwd, lvl)
@@ -234,6 +241,9 @@ class ArchiverGUI(tk.Tk):
         pop = tk.Toplevel(self)
         pop.title("Edit/Add Document")
         pop.geometry("300x250")
+        pop.transient(self)
+        pop.grab_set()
+        pop.resizable(False, False)
 
         tk.Label(pop, text=f"Path: {filepath}", wraplength=280).pack(pady=5)
         tk.Label(pop, text="Access Levels (Select multiple):").pack()
@@ -265,11 +275,14 @@ class ArchiverGUI(tk.Tk):
             messagebox.showwarning("Warning", "Select an Access Level to edit.")
             return
 
-        old_lvl = self.al_tree.item(selected[0])["values"][0]
+        old_lvl = str(self.al_tree.item(selected[0])["values"][0])
 
         pop = tk.Toplevel(self)
         pop.title("Edit Access Level")
         pop.geometry("250x100")
+        pop.transient(self)
+        pop.grab_set()
+        pop.resizable(False, False)
         tk.Label(pop, text="Name:").pack(pady=5)
 
         entry = tk.Entry(pop)
@@ -277,7 +290,7 @@ class ArchiverGUI(tk.Tk):
         entry.pack()
 
         def apply():
-            new_lvl = entry.get().strip()
+            new_lvl = str(entry.get().strip())
 
             # Try renaming the access level
             try:
@@ -298,12 +311,15 @@ class ArchiverGUI(tk.Tk):
             messagebox.showwarning("Warning", "Select a User to edit.")
             return
 
-        old_uid = self.user_tree.item(selected[0])["values"][0]
-        old_lvl = self.user_tree.item(selected[0])["values"][1]
+        old_uid = str(self.user_tree.item(selected[0])["values"][0])
+        old_lvl = str(self.user_tree.item(selected[0])["values"][1])
 
         pop = tk.Toplevel(self)
         pop.title("Edit User")
         pop.geometry("250x200")
+        pop.transient(self)
+        pop.grab_set()
+        pop.resizable(False, False)
 
         tk.Label(pop, text="Username:").pack()
         u_entry = tk.Entry(pop)
@@ -320,9 +336,9 @@ class ArchiverGUI(tk.Tk):
         cb.pack()
 
         def apply():
-            new_uid = u_entry.get().strip()
-            new_pwd = p_entry.get()
-            new_lvl = cb.get()
+            new_uid = str(u_entry.get().strip())
+            new_pwd = str(p_entry.get())
+            new_lvl = str(cb.get())
 
             # Try updating the user information
             try:
@@ -348,6 +364,9 @@ class ArchiverGUI(tk.Tk):
         pop = tk.Toplevel(self)
         pop.title("Edit Document")
         pop.geometry("300x250")
+        pop.transient(self)
+        pop.grab_set()
+        pop.resizable(False, False)
 
         tk.Label(pop, text=f"File: {fid}", wraplength=280).pack(pady=5)
         tk.Label(pop, text="Access Levels (Select multiple):").pack()
@@ -382,7 +401,7 @@ class ArchiverGUI(tk.Tk):
         if not selected:
             return
 
-        lvl_to_delete = self.al_tree.item(selected[0])["values"][0]
+        lvl_to_delete = str(self.al_tree.item(selected[0])["values"][0])
 
         # Identify any users that are currently using this access level
         affected_users = self.backend.acm.get_users_with_access_level(lvl_to_delete)
@@ -418,7 +437,7 @@ class ArchiverGUI(tk.Tk):
         if not selected:
             return
 
-        uid = self.user_tree.item(selected[0])["values"][0]
+        uid = str(self.user_tree.item(selected[0])["values"][0])
 
         # Remove from user list and access control
         try:
@@ -503,6 +522,9 @@ class ArchiverGUI(tk.Tk):
         pop = tk.Toplevel(self)
         pop.title("Export SDC")
         pop.geometry("350x150")
+        pop.transient(self)
+        pop.grab_set()
+        pop.resizable(False, False)
 
         tk.Label(pop, text="Archive Key (Password):").pack(pady=5)
         pw_entry = tk.Entry(pop, show="*")
