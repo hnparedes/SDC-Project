@@ -27,7 +27,3 @@ The project was tested on the following OSes:
 4. Run either *make* command to run the program:
   - `make run-archiver`: Runs the SDC Archiver program
   - `make run-viewer`: Runs the SDC Viewer program 
-
-
-
-For how to set up the in-dev project during development, please check `docs/project_setup.md`
