@@ -2,7 +2,11 @@ import os
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
-from sdc_archiver.archiver_backend import SDCArchiver
+try:
+    from sdc_archiver.archiver_backend import SDCArchiver
+except ModuleNotFoundError:
+    messagebox.showerror("Error", "AC key not found! Exiting...")
+    exit()
 
 # GUI classes (TODO: Windows are rescaleable, leading to buttons being hidden. Set bounds to prevent this.)
 # Author's notes: Some functions present here might be worth moving back to the backend classes?
