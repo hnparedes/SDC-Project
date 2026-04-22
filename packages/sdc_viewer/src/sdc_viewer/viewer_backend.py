@@ -8,6 +8,7 @@ import tempfile
 import py7zr
 
 # Import ACM and crypto for the viewer's later usage
+from sdc_common_module.ackey import ackey
 from sdc_common_module.crypto import CryptoSDC
 from sdc_common_module.acm import AccessControlMatrix
 
@@ -35,11 +36,27 @@ class SDCViewer:
                 archive.extractall(path=self.temp_dir)
             self.contents_dir = os.path.join(self.temp_dir, "sdc_contents")
 
-            with open(os.path.join(self.contents_dir, "acm.json"), "r") as f:
-                self.acm.load_json(json.load(f))
-            with open(os.path.join(self.contents_dir, "key_lib.json"), "r") as f:
-                self.key_library = json.load(f)
+            acm_filepath = os.path.join(self.contents_dir, "acm.enc")
+            key_library_filepath = os.path.join(self.contents_dir, "key_lib.enc")
+
+            # Read encrypted binary data
+            with open(acm_filepath, "rb") as f:
+                encrypted_acm = f.read()
+            with open(key_library_filepath, "rb") as f:
+                encrypted_key_lib = f.read()
+
+            # Decrypt ACM and key library using the master key (ackey)
+            ackey_bytes = ackey.encode("utf-8")
+            ackey_hash = hashlib.sha256(ackey_bytes).digest()
+            acm_decrypted = self.crypto.decrypt_data(encrypted_acm, ackey_hash)
+            keylib_decrypted = self.crypto.decrypt_data(encrypted_key_lib, ackey_hash)
+
+            # Decrypted ACM and key library
+            self.acm.load_json(json.loads(acm_decrypted.decode("utf-8")))
+            self.key_library = json.loads(keylib_decrypted.decode("utf-8"))
+
             return True
+            
         except py7zr.exceptions.PasswordRequired as py7z:
             # TODO: This should be handled better.
             #From Nathan: if you meant the false return, I fixed that

@@ -6,6 +6,7 @@ import hashlib
 
 import py7zr
 from Crypto.Random import get_random_bytes
+from sdc_common_module.ackey import ackey
 from sdc_common_module.crypto import CryptoSDC
 from sdc_common_module.acm import AccessControlMatrix
 
@@ -52,12 +53,22 @@ class SDCArchiver:
 
                 with open(os.path.join(temp_dir, fid), "wb") as f:
                     f.write(encrypted_data)
+                    
+            # Encrypt ACM and key library using the master key (ackey)
+            acm_json = json.dumps(self.acm.to_json(True)).encode("utf-8")
+            keylib_json = json.dumps(self.key_library).encode("utf-8")
+            ackey_bytes = ackey.encode("utf-8")
+            ackey_hash = hashlib.sha256(ackey_bytes).digest()
 
-            with open(os.path.join(temp_dir, "acm.json"), "w") as f:
-                json.dump(self.acm.to_json(True), f)
+            # Encrypted ACM and key library
+            acm_encrypted = self.crypto.encrypt_data(acm_json, ackey_hash)
+            keylib_encrypted = self.crypto.encrypt_data(keylib_json, ackey_hash)
 
-            with open(os.path.join(temp_dir, "key_lib.json"), "w") as f:
-                json.dump(self.key_library, f)
+            # Write encrypted metadata files
+            with open(os.path.join(temp_dir, "acm.enc"), "wb") as f:
+                f.write(acm_encrypted)
+            with open(os.path.join(temp_dir, "key_lib.enc"), "wb") as f:
+                f.write(keylib_encrypted)
 
             with py7zr.SevenZipFile(
                 archive_name, "w", password=hashed_password

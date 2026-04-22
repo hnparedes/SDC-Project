@@ -2,8 +2,11 @@ import os
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
-from sdc_viewer.viewer_backend import SDCViewer
-
+try:
+    from sdc_viewer.viewer_backend import SDCViewer
+except ModuleNotFoundError:
+    messagebox.showerror("Error", "AC key not found! Exiting...")
+    exit()
 
 # SDC Viewer GUI class
 class ViewerGUI(tk.Tk):
