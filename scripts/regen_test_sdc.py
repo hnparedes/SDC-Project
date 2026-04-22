@@ -23,9 +23,8 @@ archiver.acm.add_document("text_normal_3.txt", ["admin"], test_file_path + "file
 draft_output_path = test_file_path + "drafts/"
 os.makedirs(draft_output_path, exist_ok=True)
 
-# This is not implemented yet on this branch
-# draft_path = draft_output_path + "normalacm.json"
-# archiver.save_draft(draft_path)
+draft_path = draft_output_path + "normalacm.json"
+archiver.save_draft(draft_path)
 
 # Export archive
 archive_output_path = test_file_path + "sdcs/"

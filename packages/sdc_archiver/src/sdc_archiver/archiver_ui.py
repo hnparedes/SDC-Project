@@ -8,11 +8,7 @@ except ModuleNotFoundError:
     messagebox.showerror("Error", "AC key not found! Exiting...")
     exit()
 
-# GUI classes (TODO: Windows are rescaleable, leading to buttons being hidden. Set bounds to prevent this.)
-# Author's notes: Some functions present here might be worth moving back to the backend classes?
-# In addition, the archiver might be better with the documents on the right side and
-# moving the ACM and users to the left. To be discussed and implemented later as needed.
-
+# GUI classes
 
 # SDC Archiver GUI class
 class ArchiverGUI(tk.Tk):
@@ -27,12 +23,15 @@ class ArchiverGUI(tk.Tk):
         self.create_menu()
         self.create_widgets()
 
+        self.unsaved_changes = False
+
     # Create menu items
     def create_menu(self):
         menubar = tk.Menu(self)
         file_menu = tk.Menu(menubar, tearoff=0)
         file_menu.add_command(label="New Draft Archive")
-        file_menu.add_command(label="Save Draft")
+        file_menu.add_command(label="Load Draft", command=self.load_draft)
+        file_menu.add_command(label="Save Draft", command=self.save_draft)
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self.destroy)
         menubar.add_cascade(label="File", menu=file_menu)
@@ -140,14 +139,10 @@ class ArchiverGUI(tk.Tk):
         self.status_lbl.pack(side=tk.LEFT)
 
         # Bottom right general buttons
-        tk.Button(
-            bottom_frame, text="Export SDC", width=12, command=self.export_sdc
-        ).pack(side=tk.RIGHT, padx=5)
-        # TODO: As mentioned before, this button does nothing.
-        tk.Button(bottom_frame, text="Save", width=8).pack(side=tk.RIGHT, padx=5)
-        tk.Button(bottom_frame, text="Close", width=8, command=self.destroy).pack(
-            side=tk.RIGHT, padx=5
-        )
+        tk.Button(bottom_frame, text="Export SDC", width=12, command=self.export_sdc).pack(side=tk.RIGHT, padx=5)
+        tk.Button(bottom_frame, text="Save", width=8, command=self.save_draft).pack(side=tk.RIGHT, padx=5)
+        tk.Button(bottom_frame, text="Load", width=8, command=self.load_draft).pack(side=tk.RIGHT, padx=5)
+        tk.Button(bottom_frame, text="Close", width=8, command=self.destroy).pack(side=tk.RIGHT, padx=5)
 
     def refresh_sub_trees(self):
         # Helper to redraw users and documents if an Access Level is renamed.
@@ -161,6 +156,12 @@ class ArchiverGUI(tk.Tk):
         for fid in self.backend.acm.documents.keys():
             levels = self.backend.acm.documents[fid].get("access_levels", [])
             self.doc_tree.insert("", "end", values=(fid, ", ".join(levels)))
+
+    def refresh_access_level_tree(self):
+        for item in self.al_tree.get_children():
+            self.al_tree.delete(item)
+        for lvl in self.backend.acm.access_levels:
+            self.al_tree.insert("", "end", values=(lvl, lvl, "***"))
 
     # Addition methods
     def add_access_level(self):
@@ -185,6 +186,7 @@ class ArchiverGUI(tk.Tk):
                 # If it succeeds, update the access level treeview
                 self.al_tree.insert("", "end", values=(lvl,))
                 pop.destroy()
+                self.mark_unsaved_changes()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
 
@@ -224,6 +226,7 @@ class ArchiverGUI(tk.Tk):
                 # If successful, update the user treeview
                 self.user_tree.insert("", "end", values=(usr, lvl, "***"))
                 pop.destroy()
+                self.mark_unsaved_changes()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
 
@@ -263,6 +266,7 @@ class ArchiverGUI(tk.Tk):
                     "", "end", values=(filename, ", ".join(selected_levels))
                 )
                 pop.destroy()
+                self.mark_unsaved_changes()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
 
@@ -299,6 +303,7 @@ class ArchiverGUI(tk.Tk):
                 self.al_tree.item(selected[0], values=(new_lvl,))
                 self.refresh_sub_trees()
                 pop.destroy()
+                self.mark_unsaved_changes()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
 
@@ -345,6 +350,7 @@ class ArchiverGUI(tk.Tk):
                 # If successful, update the user treeview
                 self.user_tree.item(selected[0], values=(new_uid, new_lvl, "***"))
                 pop.destroy()
+                self.mark_unsaved_changes()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
 
@@ -387,6 +393,7 @@ class ArchiverGUI(tk.Tk):
                     selected[0], values=(fid, ", ".join(selected_levels))
                 )
                 pop.destroy()
+                self.mark_unsaved_changes()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
 
@@ -425,6 +432,7 @@ class ArchiverGUI(tk.Tk):
             # If successful, update the relevant treeviews
             self.al_tree.delete(selected[0])
             self.refresh_sub_trees()
+            self.mark_unsaved_changes()
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
@@ -440,6 +448,7 @@ class ArchiverGUI(tk.Tk):
             self.backend.acm.delete_user(uid)
             # Remove from UI tree
             self.user_tree.delete(selected[0])
+            self.mark_unsaved_changes()
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
@@ -455,8 +464,44 @@ class ArchiverGUI(tk.Tk):
             self.backend.acm.delete_document(fid)
             # Remove from UI tree
             self.doc_tree.delete(selected[0])
+            self.mark_unsaved_changes()
         except Exception as e:
             messagebox.showerror("Error", str(e))
+
+    def save_draft(self):
+        filepath = filedialog.asksaveasfilename(
+            defaultextension=".json", filetypes=[("JSON file", "*.json")]
+        )
+        if not filepath:
+            return
+
+        try:
+            self.status_lbl.config(text="Saving...")
+            self.backend.save_draft(filepath)
+            messagebox.showinfo("Success", f"Successfully saved ACM to {str(filepath)}")
+            self.status_lbl.config(text="Saving Complete.")
+            self.clear_unsaved_changes()
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+            self.status_lbl.config(text="Saving Failed.")
+
+    def load_draft(self):
+        filepath = filedialog.askopenfilename(
+            defaultextension=".json", filetypes=[("JSON file", "*.json")]
+        )
+        if not filepath:
+            return
+
+        try:
+            self.status_lbl.config(text="Loading...")
+            self.backend.load_draft(filepath)
+            self.status_lbl.config(text="Loading Complete.")
+            self.refresh_access_level_tree()
+            self.refresh_sub_trees()
+            self.clear_unsaved_changes()
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+            self.status_lbl.config(text="Loading Failed.")
 
     # SDC export GUI function
     def export_sdc(self):
@@ -509,6 +554,34 @@ class ArchiverGUI(tk.Tk):
             pop.destroy()
 
         tk.Button(pop, text="Export", command=apply).pack(pady=15)
+
+    def clear_unsaved_changes(self):
+        self.unsaved_changes = False
+        self.title("SDC Archiver (Main Window)")
+
+    def mark_unsaved_changes(self):
+        self.unsaved_changes = True
+        self.title("SDC Archiver (Main Window) (Unsaved Changes)")
+
+    # Override the base destroy function
+    def destroy(self):
+        close = True
+        if self.unsaved_changes:
+            close = self.save_warning()
+
+        if close:
+            super().destroy()
+            return
+
+    def save_warning(self):
+        choice = tk.messagebox.askyesnocancel(title="Exit", message="There are unsaved changes. Do you want to save a draft archive before exiting?\n\n(Note: exported archives cannot be edited, you should save a draft archive if you want to edit it in the future)",)
+        if choice is None:
+            return False
+        elif choice:
+            self.save_draft()
+            return True
+        else:
+            return True
 
 
 if __name__ == "__main__":

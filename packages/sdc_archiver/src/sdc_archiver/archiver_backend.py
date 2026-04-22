@@ -19,6 +19,16 @@ class SDCArchiver:
         self.crypto = CryptoSDC()
         self.key_library = {}
 
+    # Saves draft ACM
+    def save_draft(self, location):
+        with open(location, "w") as f:
+            json.dump(self.acm.to_json(), f)
+
+    # Loads draft ACM
+    def load_draft(self, location):
+        with open(location, "r") as f:
+            self.acm.load_json(json.load(f))
+
     # Exports completed SDC
     def export_archive(self, archive_name, archive_password):
         temp_dir = tempfile.mkdtemp(prefix=".tempdir_sdc_")
