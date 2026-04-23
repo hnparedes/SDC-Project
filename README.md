@@ -12,11 +12,10 @@ The project was tested on the following:
 - **Windows 11**
 - **MacOS Tahoe 26.4**
 - The following Linux distros:
-  - **CachyOS** (Arch-based)
-  - **Linux Mint** (Debian-based)
+  - **CachyOS** (Arch-based) 
 
 # How to Run
-Download *TBA* from Releases
+Download packages from Releases
 
 # Compiling (devs only)
 **NOTE: You will need the super secret ackey (Access Control Key) to be able to compile or build the programs yourself. Only the devs have it, as the ackey is not version controlled for *security***
