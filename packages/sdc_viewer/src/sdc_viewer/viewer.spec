@@ -21,7 +21,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name="viewer_ui",
+    name="SDC_Viewer",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

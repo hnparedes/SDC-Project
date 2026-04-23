@@ -20,7 +20,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name="archiver_ui",
+    name="SDC_Archiver",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
