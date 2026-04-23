@@ -17,3 +17,6 @@ regen-test-sdc:
 # Remove old test files
 clean:
 	$(delcommand) .test-output
+
+build-archiver:
+	pyinstaller ./packages/sdc_archiver/src/sdc_archiver/archiver.spec --distpath ./bin/sdc_archiver/dist --workpath ./bin/sdc_archiver/build
