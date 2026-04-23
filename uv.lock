@@ -415,7 +415,7 @@ source = { editable = "packages/sdc_common_module" }
 
 [[package]]
 name = "sdc-project"
-version = "0.1.0"
+version = "0.9.9"
 source = { virtual = "." }
 dependencies = [
     { name = "py7zr" },
