@@ -15,6 +15,7 @@ class ViewerGUI(tk.Tk):
         super().__init__()
         self.title("SDC Viewer")
         self.geometry("410x150")
+        self.resizable(False, False)
         self.backend = SDCViewer()
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -79,6 +80,7 @@ class ViewerGUI(tk.Tk):
         for widget in self.winfo_children():
             widget.destroy()
         self.geometry("300x150")
+        self.resizable(False, False)
 
         tk.Label(self, text="Authenticate", font=("Helvetica", 12, "bold")).pack(pady=5)
 
@@ -117,6 +119,7 @@ class ViewerGUI(tk.Tk):
         for widget in self.winfo_children():
             widget.destroy()
         self.geometry("350x300")
+        self.resizable(False, False)
 
         tk.Label(self, text="Select Documents / Files to Extract", anchor="w").pack(
             fill=tk.X, padx=10, pady=5
